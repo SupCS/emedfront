@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getUserProfile } from "../api/profileApi";
+import DoctorSchedule from "../components/DoctorSchedule";
 
 function ProfilePage() {
     const { role, id } = useParams();
@@ -8,16 +9,14 @@ function ProfilePage() {
     const [profile, setProfile] = useState(null);
     const [error, setError] = useState("");
 
-    // Отримуємо роль поточного користувача
     const currentUserRole = localStorage.getItem("userRole");
     const currentUserId = localStorage.getItem("userId");
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                // Якщо пацієнт намагається переглянути чужий профіль пацієнта – перенаправляємо
                 if (currentUserRole === "patient" && role === "patient" && currentUserId !== id) {
-                    navigate("/"); // Або відобрази повідомлення про помилку
+                    navigate("/");
                     return;
                 }
 
@@ -52,7 +51,9 @@ function ProfilePage() {
                     <p><strong>Rating:</strong> {profile.rating}</p>
                     <p><strong>Bio:</strong> {profile.bio}</p>
                     <p><strong>Awards:</strong> {profile.awards?.join(", ") || "No awards"}</p>
-                    <p><strong>Schedule:</strong> {profile.schedule?.join(", ") || "No schedule available"}</p>
+
+                    {/* Підключаємо розклад лікаря */}
+                    <DoctorSchedule doctorId={id} />
                 </>
             ) : (
                 <>
