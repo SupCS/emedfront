@@ -6,10 +6,18 @@ function LoginPage() {
     const navigate = useNavigate();
 
     const handleLogin = async (email, password) => {
-        const data = await loginUser(email, password);
-        localStorage.setItem("authToken", data.token);
-        localStorage.setItem("userRole", data.role);
-        navigate("/"); // Перенаправлення після логіну
+        try {
+            const data = await loginUser(email, password);
+            localStorage.setItem("authToken", data.token);
+            localStorage.setItem("userRole", data.role);
+            localStorage.setItem("userId", data.user.id);
+
+            // Перенаправляємо на відповідний профіль
+            const profilePath = data.role === "doctor" ? `/profile/doctor/${data.user.id}` : `/profile/patient/${data.user.id}`;
+            navigate(profilePath);
+        } catch (error) {
+            console.error("Login error:", error.message);
+        }
     };
     
 
