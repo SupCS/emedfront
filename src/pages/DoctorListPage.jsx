@@ -1,12 +1,17 @@
 import { useEffect, useState, useCallback } from "react";
-import { getDoctors } from "../api/doctorApi";
+import { getDoctors, getDoctorDetails } from "../api/doctorApi";
 import DoctorCard from "../components/DoctorCard";
+import DoctorModal from "../components/DoctorModal";
 
 function DoctorListPage() {
     const [doctors, setDoctors] = useState([]);
     const [error, setError] = useState("");
     const [selectedSpecializations, setSelectedSpecializations] = useState([]);
     const [rating, setRating] = useState("");
+
+    // Стан для модального вікна
+    const [selectedDoctor, setSelectedDoctor] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const specializations = ["Психіатр", "Психолог", "Лор"];
 
@@ -22,7 +27,7 @@ function DoctorListPage() {
 
     useEffect(() => {
         fetchDoctors();
-    }, [fetchDoctors]); // Додаємо fetchDoctors як залежність
+    }, [fetchDoctors]);
 
     const handleSpecializationChange = (e) => {
         const { value, checked } = e.target;
@@ -31,6 +36,21 @@ function DoctorListPage() {
         } else {
             setSelectedSpecializations(selectedSpecializations.filter((spec) => spec !== value));
         }
+    };
+
+    const openModal = async (doctorId) => {
+        try {
+            const doctorDetails = await getDoctorDetails(doctorId);
+            setSelectedDoctor(doctorDetails);
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error("Помилка завантаження деталей лікаря:", error);
+        }
+    };
+
+    const closeModal = () => {
+        setSelectedDoctor(null);
+        setIsModalOpen(false);
     };
 
     return (
@@ -71,17 +91,29 @@ function DoctorListPage() {
             <div style={cardContainerStyle}>
                 {doctors.length > 0 ? (
                     doctors.map((doctor) => (
-                        <DoctorCard
-                            key={doctor._id}
-                            name={doctor.name}
-                            specialization={doctor.specialization}
-                            rating={doctor.rating}
-                        />
+                        <div 
+                            key={doctor._id} 
+                            onClick={() => openModal(doctor._id)}
+                            style={{ cursor: "pointer" }} // Робимо картку клікабельною
+                        >
+                            <DoctorCard
+                                name={doctor.name}
+                                specialization={doctor.specialization}
+                                rating={doctor.rating}
+                            />
+                        </div>
                     ))
                 ) : (
                     <p>Лікарів не знайдено за обраними фільтрами.</p>
                 )}
             </div>
+
+            {/* Модальне вікно */}
+            <DoctorModal
+                doctor={selectedDoctor}
+                isOpen={isModalOpen}
+                onClose={closeModal}
+            />
         </div>
     );
 }

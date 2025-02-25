@@ -14,3 +14,8 @@ export const getDoctors = async (specializations, rating) => {
 
     return handleRequest(axiosInstance.get(`/doctors${query ? `?${query}` : ""}`));
 };
+
+// Отримання деталей лікаря
+export const getDoctorDetails = async (doctorId) => {
+    return handleRequest(axiosInstance.get(`/doctors/details/${doctorId}`));
+};
