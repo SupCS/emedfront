@@ -4,6 +4,7 @@ import LoginPage from "../pages/LoginPage/LoginPage";
 import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import DoctorListPage from "../pages/DoctorListPage";
+import ChatPage from "../pages/ChatPage/ChatPage";
 
 function AppRouter() {
   return (
@@ -14,6 +15,7 @@ function AppRouter() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/profile/:role/:id" element={<ProfilePage />} />
         <Route path="/doctors" element={<DoctorListPage />} />
+        <Route path="/chat" element={<ChatPage />} />
       </Routes>
     </Router>
   );
