@@ -1,0 +1,25 @@
+.appointmentsContainer {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.appointmentsTitle {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.appointmentsList {
+  list-style: none;
+  padding: 0;
+}
+
+.appointmentItem {
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.appointmentItem:last-child {
+  border-bottom: none;
+}

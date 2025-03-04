@@ -1,13 +1,3 @@
-/* Глобальні змінні для кольорової схеми */
-:root {
-  --primary-color: #646cff;
-  --primary-hover: #535bf2;
-  --background-light: #f5f5f5;
-  --background-dark: #242424;
-  --text-light: #333;
-  --text-dark: rgba(255, 255, 255, 0.87);
-}
-
 /* Стилі для кореневих елементів */
 html,
 body {
@@ -17,31 +7,4 @@ body {
   height: 100%;
   overflow-x: hidden;
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-}
-
-/* Вирівнювання контенту */
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--background-light);
-  color: var(--text-light);
-  min-height: 100vh;
-}
-
-#root {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Адаптивні налаштування */
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: var(--background-dark);
-    color: var(--text-dark);
-  }
 }
