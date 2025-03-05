@@ -11,6 +11,9 @@ const ChatList = ({ chats, onSelectChat }) => {
         {chats.map((chat) => (
           <li key={chat._id} onClick={() => onSelectChat(chat)}>
             {chat.participants.map((p) => p.name).join(", ")}
+            {chat.unreadCount > 0 && (
+              <span className={styles.unreadBadge}>{chat.unreadCount}</span>
+            )}
           </li>
         ))}
       </ul>

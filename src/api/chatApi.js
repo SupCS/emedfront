@@ -14,3 +14,13 @@ export const getChatMessages = async (chatId) => {
 export const sendMessage = async (chatId, content) => {
   return handleRequest(axiosInstance.post("chat/message", { chatId, content }));
 };
+
+// Отримати кількість непрочитаних повідомлень
+export const getUnreadCounts = async (userId) => {
+  return handleRequest(axiosInstance.get(`/chat/unread/${userId}`));
+};
+
+// Позначити повідомлення як прочитані
+export const markChatAsRead = async (chatId, userId) => {
+  return handleRequest(axiosInstance.post(`/chat/read`, { chatId, userId }));
+};

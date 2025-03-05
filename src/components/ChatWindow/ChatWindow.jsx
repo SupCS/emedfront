@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { getChatMessages } from "../../api/chatApi";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { getChatMessages, markChatAsRead } from "../../api/chatApi";
 import {
   socket,
   connectSocket,
@@ -12,28 +12,25 @@ const ChatWindow = ({ chat, currentUser }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [error, setError] = useState("");
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (!chat || !currentUser) return;
 
-    // Підключаємо WebSocket (лише якщо ще не підключено)
     if (!socket.connected) {
-      console.log("🟢 Connecting WebSocket...");
       connectSocket();
     }
 
-    // Очікуємо підключення перед приєднанням до чату
     socket.on("connect", () => {
-      console.log(`✅ WebSocket connected! Joining chat ${chat._id}`);
       joinChat(chat._id);
     });
 
-    // Отримуємо історію повідомлень при першому завантаженні
     const fetchMessages = async () => {
       try {
         const data = await getChatMessages(chat._id);
-        console.log("🔵 Messages fetched:", data);
         setMessages(data);
+
+        await markChatAsRead(chat._id, currentUser.id);
       } catch (err) {
         setError(err.message || "Не вдалося завантажити повідомлення.");
       }
@@ -41,28 +38,37 @@ const ChatWindow = ({ chat, currentUser }) => {
 
     fetchMessages();
 
-    // Обробник події отримання нового повідомлення
-    const handleReceiveMessage = (message) => {
-      console.log("🟢 New message received:", message);
-      if (String(message.chat) === String(chat._id)) {
-        setMessages((prev) => [...prev, message]);
-      }
-    };
-
-    // Перевірка чи підключено слухач
-    console.log("🔵 Subscribing to receiveMessage...");
-    socket.on("receiveMessage", handleReceiveMessage);
-
     return () => {
-      console.log("🔴 Unsubscribing from receiveMessage...");
-      socket.off("receiveMessage", handleReceiveMessage);
+      socket.off("connect");
     };
   }, [chat, currentUser]);
 
+  // Використовуємо useCallback, щоб уникнути повторних ререндерів
+  const handleReceiveMessage = useCallback(
+    async (message) => {
+      if (String(message.chat) === String(chat._id)) {
+        setMessages((prev) => [...prev, message]);
+
+        await markChatAsRead(chat._id, currentUser.id);
+      }
+    },
+    [chat, currentUser]
+  );
+
+  useEffect(() => {
+    socket.on("receiveMessage", handleReceiveMessage);
+    return () => {
+      socket.off("receiveMessage", handleReceiveMessage);
+    };
+  }, [handleReceiveMessage]);
+
+  // Прокрутка вниз після отримання нового повідомлення
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
-
-    console.log("🔵 Sending message...");
     sendMessageSocket(chat._id, newMessage);
     setNewMessage("");
   };
@@ -75,9 +81,10 @@ const ChatWindow = ({ chat, currentUser }) => {
       <div className={styles.messages}>
         {messages.map((msg) => (
           <div key={msg._id} className={styles.message}>
-            <strong>{msg.sender?.name || "Анонім"}:</strong> {msg.content}
+            <strong>{msg.senderName || "Анонім"}:</strong> {msg.content}
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <div className={styles.inputArea}>
         <input

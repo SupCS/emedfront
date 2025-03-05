@@ -4,14 +4,21 @@ const SOCKET_URL = "http://localhost:5000";
 
 export const socket = io(SOCKET_URL, {
   auth: {
-    token: localStorage.getItem("authToken"), // Використовуємо той же токен, що й в `axiosInstance`
+    token: localStorage.getItem("authToken"),
   },
-  autoConnect: false, // Не підключатися автоматично
+  autoConnect: false,
 });
 
 export const connectSocket = () => {
+  const token = localStorage.getItem("authToken");
+
+  if (!token) {
+    console.log("🔴 No auth token found, cannot connect to WebSocket.");
+    return;
+  }
+
   if (!socket.connected) {
-    socket.auth.token = localStorage.getItem("authToken"); // Оновлюємо токен при кожному підключенні
+    socket.auth.token = token; // Оновлюємо токен
     socket.connect();
   }
 };
@@ -24,10 +31,7 @@ export const disconnectSocket = () => {
 
 export const joinChat = (chatId) => {
   if (socket.connected) {
-    console.log(`📩 Emitting joinChat for chatId: ${chatId}`);
     socket.emit("joinChat", { chatId });
-  } else {
-    console.log("🔴 Socket is not connected, cannot join chat.");
   }
 };
 
