@@ -64,7 +64,11 @@ const ChatPage = () => {
   return (
     <div className={styles.chatPage}>
       {error && <p className={styles.error}>{error}</p>}
-      <ChatList chats={chats} onSelectChat={handleSelectChat} />
+      <ChatList
+        chats={chats}
+        onSelectChat={handleSelectChat}
+        currentUser={currentUser}
+      />
       {selectedChat ? (
         <ChatWindow chat={selectedChat} currentUser={currentUser} />
       ) : (
