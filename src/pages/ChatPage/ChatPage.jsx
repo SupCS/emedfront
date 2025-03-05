@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { useSearchParams } from "react-router-dom";
 import ChatList from "../../components/ChatList/ChatList";
 import ChatWindow from "../../components/ChatWindow/ChatWindow";
 import {
@@ -14,6 +15,7 @@ const ChatPage = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [error, setError] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -40,13 +42,24 @@ const ChatPage = () => {
         }));
 
         setChats(updatedChats);
+
+        // Перевіряємо, чи є параметр chatId у URL
+        const chatIdFromUrl = searchParams.get("chatId");
+        if (chatIdFromUrl) {
+          const chatToSelect = updatedChats.find(
+            (chat) => chat._id === chatIdFromUrl
+          );
+          if (chatToSelect) {
+            handleSelectChat(chatToSelect); // Автоматично вибираємо чат
+          }
+        }
       } catch (err) {
         setError(err.message || "Не вдалося завантажити чати.");
       }
     };
 
     fetchChats();
-  }, []);
+  }, [searchParams]);
 
   const handleSelectChat = async (chat) => {
     setSelectedChat(chat);

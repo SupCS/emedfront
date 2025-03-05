@@ -24,3 +24,20 @@ export const getUnreadCounts = async (userId) => {
 export const markChatAsRead = async (chatId, userId) => {
   return handleRequest(axiosInstance.post(`/chat/read`, { chatId, userId }));
 };
+
+// Створити новий чат
+export const createChat = async (
+  userId,
+  userType,
+  recipientId,
+  recipientType
+) => {
+  return handleRequest(
+    axiosInstance.post("/chat", {
+      userId,
+      userType,
+      recipientId,
+      recipientType,
+    })
+  );
+};
