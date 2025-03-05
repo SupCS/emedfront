@@ -73,11 +73,14 @@ const ChatWindow = ({ chat, currentUser }) => {
     setNewMessage("");
   };
 
+  // Знаходимо ім'я співрозмовника
+  const interlocutor = chat.participants.find((p) => p._id !== currentUser.id);
+
   if (!chat) return <p className={styles.noChatSelected}>Виберіть чат</p>;
 
   return (
     <div className={styles.chatWindow}>
-      <h3>Чат з {chat.participants.map((p) => p.name).join(", ")}</h3>
+      <h3>Чат з {interlocutor ? interlocutor.name : "Невідомий"}</h3>
       <div className={styles.messages}>
         {messages.map((msg) => (
           <div key={msg._id} className={styles.message}>
