@@ -57,6 +57,14 @@ function ProfilePage() {
           <ProfileInfo profile={profile} role={role} />
           <AppointmentsList appointments={appointments} role={role} />
           {role === "doctor" && <DoctorSchedule doctorId={id} />}
+          {role === "patient" && (
+            <button
+              className={styles.prescriptionsButton}
+              onClick={() => navigate(`/profile/patient/${id}/prescriptions`)}
+            >
+              Мої призначення
+            </button>
+          )}
           <LogoutButton onLogout={handleLogout} />
         </>
       )}
