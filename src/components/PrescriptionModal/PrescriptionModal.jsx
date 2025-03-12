@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import { createPrescription } from "../../api/prescriptionsApi";
 import styles from "./PrescriptionModal.module.css";
 
@@ -7,13 +8,9 @@ const PrescriptionModal = ({ isOpen, onClose, patientId }) => {
   const [treatment, setTreatment] = useState("");
   const [validUntil, setValidUntil] = useState("");
   const [noExpiry, setNoExpiry] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
 
     try {
       await createPrescription({
@@ -23,7 +20,9 @@ const PrescriptionModal = ({ isOpen, onClose, patientId }) => {
         validUntil: noExpiry ? null : validUntil,
       });
 
-      setSuccess("Призначення успішно створено!");
+      toast.success("Призначення успішно створено!");
+
+      // Очищуємо форму після успішного створення
       setDiagnosis("");
       setTreatment("");
       setValidUntil("");
@@ -33,7 +32,7 @@ const PrescriptionModal = ({ isOpen, onClose, patientId }) => {
         onClose();
       }, 2000);
     } catch (err) {
-      setError(err.message || "Не вдалося створити призначення.");
+      toast.error(err.message || "Не вдалося створити призначення.");
     }
   };
 
@@ -43,8 +42,6 @@ const PrescriptionModal = ({ isOpen, onClose, patientId }) => {
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <h2>Створити призначення</h2>
-        {error && <p className={styles.error}>{error}</p>}
-        {success && <p className={styles.success}>{success}</p>}
         <form onSubmit={handleSubmit}>
           <label>
             Діагноз:

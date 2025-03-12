@@ -6,12 +6,12 @@ import {
   joinChat,
   sendMessageSocket,
 } from "../../api/socket";
+import { toast } from "react-toastify";
 import styles from "./ChatWindow.module.css";
 
 const ChatWindow = ({ chat, currentUser }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [error, setError] = useState("");
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const ChatWindow = ({ chat, currentUser }) => {
 
         await markChatAsRead(chat._id, currentUser.id);
       } catch (err) {
-        setError(err.message || "Не вдалося завантажити повідомлення.");
+        toast.error(`Не вдалося завантажити повідомлення: ${err.message}`);
       }
     };
 
@@ -69,8 +69,13 @@ const ChatWindow = ({ chat, currentUser }) => {
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
-    sendMessageSocket(chat._id, newMessage);
-    setNewMessage("");
+
+    try {
+      sendMessageSocket(chat._id, newMessage);
+      setNewMessage("");
+    } catch (err) {
+      toast.error(`Помилка відправлення: ${err.message}`);
+    }
   };
 
   // Знаходимо ім'я співрозмовника
@@ -98,7 +103,6 @@ const ChatWindow = ({ chat, currentUser }) => {
         />
         <button onClick={handleSendMessage}>Відправити</button>
       </div>
-      {error && <p className={styles.error}>{error}</p>}
     </div>
   );
 };

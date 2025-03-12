@@ -4,11 +4,10 @@ import { createAppointment } from "../api/appointmentApi";
 import { getUserChats, createChat } from "../api/chatApi";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function DoctorModal({ doctor, isOpen, onClose }) {
   const [schedule, setSchedule] = useState([]);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,6 +17,7 @@ function DoctorModal({ doctor, isOpen, onClose }) {
           const data = await getDoctorSchedule(doctor._id);
           setSchedule(data.availability);
         } catch (error) {
+          toast.error("Помилка завантаження розкладу лікаря.");
           console.error("Помилка завантаження розкладу:", error);
         }
       }
@@ -29,7 +29,7 @@ function DoctorModal({ doctor, isOpen, onClose }) {
   const handleBookSlot = async (date, startTime, endTime) => {
     try {
       await createAppointment(doctor._id, date, startTime, endTime);
-      setSuccessMessage("Ви успішно записались на прийом!");
+      toast.success("Ви успішно записались на прийом!");
 
       const updatedSchedule = schedule
         .map((day) => {
@@ -47,8 +47,8 @@ function DoctorModal({ doctor, isOpen, onClose }) {
 
       setSchedule(updatedSchedule);
     } catch (error) {
+      toast.error("Не вдалося записатись на прийом.");
       console.error("Помилка запису на прийом:", error);
-      setError("Не вдалося записатись на прийом. Спробуйте ще раз.");
     }
   };
 
@@ -56,7 +56,7 @@ function DoctorModal({ doctor, isOpen, onClose }) {
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
-        setError("Будь ласка, увійдіть у систему, щоб почати чат.");
+        toast.error("Будь ласка, увійдіть у систему, щоб почати чат.");
         return;
       }
 
@@ -70,12 +70,12 @@ function DoctorModal({ doctor, isOpen, onClose }) {
       );
 
       if (existingChat) {
-        navigate(`/chat?chatId=${existingChat._id}`); // Передаємо ID існуючого чату
+        navigate(`/chat?chatId=${existingChat._id}`);
         onClose();
         return;
       }
 
-      // Створюємо новий чат і отримуємо його дані
+      // Створюємо новий чат
       const newChat = await createChat(
         patientId,
         "Patient",
@@ -83,12 +83,11 @@ function DoctorModal({ doctor, isOpen, onClose }) {
         "Doctor"
       );
 
-      // Переходимо на сторінку чатів із ID нового чату
       navigate(`/chat?chatId=${newChat._id}`);
       onClose();
     } catch (error) {
+      toast.error("Не вдалося створити чат.");
       console.error("Помилка створення чату:", error);
-      setError("Не вдалося створити чат. Спробуйте ще раз.");
     }
   };
 
@@ -119,8 +118,6 @@ function DoctorModal({ doctor, isOpen, onClose }) {
         </button>
 
         <h3>Вільні часові слоти:</h3>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
 
         {schedule && schedule.length > 0 ? (
           schedule.map((day, index) => (

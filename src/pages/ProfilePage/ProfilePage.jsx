@@ -8,16 +8,16 @@ import {
 import ProfileInfo from "../../components/ProfileInfo/ProfileInfo";
 import AppointmentsList from "../../components/AppointmentsList/AppointmentsList";
 import LogoutButton from "../../components/LogoutButton/LogoutButton";
-import styles from "./ProfilePage.module.css";
 import DoctorSchedule from "../../components/DoctorSchedule";
 import Loader from "../../components/Loader/Loader";
+import { toast } from "react-toastify";
+import styles from "./ProfilePage.module.css";
 
 function ProfilePage() {
   const { role, id } = useParams();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,8 +31,8 @@ function ProfilePage() {
             ? await getDoctorAppointments(id)
             : await getPatientAppointments(id);
         setAppointments(appointmentsData);
-      } catch {
-        setError("Failed to load profile");
+      } catch (error) {
+        toast.error(error.message || "Не вдалося завантажити профіль.");
       } finally {
         setLoading(false);
       }
@@ -43,10 +43,9 @@ function ProfilePage() {
 
   const handleLogout = () => {
     localStorage.clear();
+    toast.info("Ви вийшли з акаунту.");
     navigate("/login");
   };
-
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <div className={styles.pageContainer}>

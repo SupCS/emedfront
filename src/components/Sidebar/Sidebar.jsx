@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { toast } from "react-toastify";
 import styles from "./Sidebar.module.css";
 
 const Sidebar = () => {
@@ -14,14 +15,19 @@ const Sidebar = () => {
         const decoded = jwtDecode(token);
         setCurrentUser({ id: decoded.id, role: decoded.role });
       } catch (error) {
-        console.error("Помилка декодування токена:", error);
+        toast.error("Помилка декодування токена");
       }
     }
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    navigate("/login");
+    try {
+      localStorage.removeItem("authToken");
+      toast.success("Вихід успішний");
+      navigate("/login");
+    } catch (error) {
+      toast.error("Помилка під час виходу");
+    }
   };
 
   return (

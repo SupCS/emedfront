@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { getPatientPrescriptions } from "../../api/prescriptionsApi";
 import { jwtDecode } from "jwt-decode";
 import Loader from "../../components/Loader/Loader";
@@ -10,7 +11,6 @@ const PrescriptionsPage = () => {
   const { id } = useParams();
   const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [isDoctor, setIsDoctor] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -20,7 +20,7 @@ const PrescriptionsPage = () => {
         const data = await getPatientPrescriptions(id);
         setPrescriptions(data);
       } catch (err) {
-        setError(err.message || "Не вдалося завантажити призначення.");
+        toast.error(err.message || "Не вдалося завантажити призначення.");
       } finally {
         setLoading(false);
       }
@@ -37,7 +37,6 @@ const PrescriptionsPage = () => {
   }, [id]);
 
   if (loading) return <Loader />;
-  if (error) return <p className={styles.error}>{error}</p>;
 
   return (
     <div className={styles.container}>
