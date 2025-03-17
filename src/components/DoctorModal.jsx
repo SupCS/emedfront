@@ -99,7 +99,14 @@ function DoctorModal({ doctor, isOpen, onClose }) {
         <button onClick={onClose} style={closeButtonStyle}>
           Закрити
         </button>
-        <h2>{doctor.name}</h2>
+        <div style={doctorHeaderStyle}>
+          <img
+            src={doctor.avatarUrl || "/images/default-avatar.webp"}
+            alt="Аватар лікаря"
+            style={modalAvatarStyle}
+          />
+          <h2>{doctor.name}</h2>
+        </div>
         <p>
           <strong>Спеціалізація:</strong> {doctor.specialization}
         </p>
@@ -147,6 +154,19 @@ function DoctorModal({ doctor, isOpen, onClose }) {
     </div>
   );
 }
+
+const doctorHeaderStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "15px",
+};
+
+const modalAvatarStyle = {
+  width: "80px",
+  height: "80px",
+  borderRadius: "50%",
+  objectFit: "cover",
+};
 
 const slotStyle = {
   display: "flex",

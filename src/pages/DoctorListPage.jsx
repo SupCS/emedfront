@@ -3,6 +3,7 @@ import { getDoctors, getDoctorDetails } from "../api/doctorApi";
 import DoctorCard from "../components/DoctorCard";
 import DoctorModal from "../components/DoctorModal";
 import { toast } from "react-toastify";
+import { getAvatarUrl } from "../api/avatarApi";
 
 function DoctorListPage() {
   const [doctors, setDoctors] = useState([]);
@@ -44,7 +45,12 @@ function DoctorListPage() {
   const openModal = async (doctorId) => {
     try {
       const doctorDetails = await getDoctorDetails(doctorId);
-      setSelectedDoctor(doctorDetails);
+      setSelectedDoctor({
+        ...doctorDetails,
+        avatarUrl: doctorDetails.avatar
+          ? getAvatarUrl(doctorDetails.avatar)
+          : null,
+      });
       setIsModalOpen(true);
     } catch (error) {
       toast.error("Помилка завантаження деталей лікаря.");
@@ -99,6 +105,7 @@ function DoctorListPage() {
                 name={doctor.name}
                 specialization={doctor.specialization}
                 rating={doctor.rating}
+                avatar={doctor.avatar ? getAvatarUrl(doctor.avatar) : null}
               />
             </div>
           ))
