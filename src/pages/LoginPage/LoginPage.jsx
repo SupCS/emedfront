@@ -5,6 +5,7 @@ import { loginUser } from "../../api/authApi";
 import LoginForm from "../../components/LoginForm/LoginForm";
 import styles from "./LoginPage.module.css";
 import Loader from "../../components/Loader/Loader";
+import { connectSocket } from "../../api/socket";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ function LoginPage() {
       localStorage.setItem("authToken", data.token);
       localStorage.setItem("userRole", data.role);
       localStorage.setItem("userId", data.user.id);
+
+      connectSocket();
 
       // Відображаємо повідомлення про успішний вхід
       toast.success("Вхід виконано успішно!");

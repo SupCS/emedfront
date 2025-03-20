@@ -18,25 +18,27 @@ export const connectSocket = () => {
   }
 
   if (!socket.connected) {
-    socket.auth.token = token; // Оновлюємо токен
+    socket.auth.token = token;
     socket.connect();
+    console.log("🟢 WebSocket connected");
   }
 };
 
 export const disconnectSocket = () => {
   if (socket.connected) {
     socket.disconnect();
+    console.log("🔴 WebSocket disconnected");
   }
 };
 
-export const joinChat = (chatId) => {
+export const sendMessageSocket = (chatId, content, recipientId) => {
   if (socket.connected) {
-    socket.emit("joinChat", { chatId });
+    socket.emit("sendMessage", { chatId, content, recipientId });
+  } else {
+    console.error("🔴 WebSocket is not connected");
   }
 };
 
-export const sendMessageSocket = (chatId, content) => {
-  if (socket.connected) {
-    socket.emit("sendMessage", { chatId, content });
-  }
-};
+if (localStorage.getItem("authToken")) {
+  connectSocket();
+}
