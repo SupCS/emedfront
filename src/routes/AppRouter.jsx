@@ -13,6 +13,7 @@ import PrescriptionsPage from "../pages/PrescriptionsPage/PrescriptionsPage";
 import ChatPage from "../pages/ChatPage/ChatPage";
 import Sidebar from "../components/Sidebar/Sidebar";
 import styles from "./AppRouter.module.css";
+import Notifications from "../components/Notifications";
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -46,6 +47,7 @@ function AppRouter() {
           <Route path="/chat" element={<ChatPage />} />
         </Routes>
       </Layout>
+      <Notifications />
     </Router>
   );
 }

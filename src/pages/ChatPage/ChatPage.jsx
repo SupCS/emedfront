@@ -45,12 +45,14 @@ const ChatPage = () => {
 
         // Перевіряємо, чи є параметр chatId у URL
         const chatIdFromUrl = searchParams.get("chatId");
-        if (chatIdFromUrl) {
+        if (chatIdFromUrl && updatedChats.length > 0) {
           const chatToSelect = updatedChats.find(
             (chat) => chat._id === chatIdFromUrl
           );
-          if (chatToSelect) {
-            handleSelectChat(chatToSelect); // Автоматично вибираємо чат
+
+          // Переконуємось, що currentUser вже встановлений
+          if (chatToSelect && decoded?.id) {
+            handleSelectChat(chatToSelect, decoded.id);
           }
         }
       } catch (err) {
@@ -61,11 +63,19 @@ const ChatPage = () => {
     fetchChats();
   }, [searchParams]);
 
-  const handleSelectChat = async (chat) => {
+  const handleSelectChat = async (chat, userId) => {
     setSelectedChat(chat);
 
     if (chat.unreadCount > 0) {
-      await markChatAsRead(chat._id, currentUser.id);
+      const userToMark = userId || currentUser?.id;
+      if (!userToMark) {
+        console.warn(
+          "⚠️ currentUser ще не ініціалізований, пропускаємо оновлення."
+        );
+        return;
+      }
+
+      await markChatAsRead(chat._id, userToMark);
       setChats((prevChats) =>
         prevChats.map((c) =>
           c._id === chat._id ? { ...c, unreadCount: 0 } : c

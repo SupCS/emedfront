@@ -73,6 +73,11 @@ const ChatWindow = ({ chat, currentUser }) => {
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
 
+    if (newMessage.length > 1000) {
+      toast.error("Повідомлення занадто довге.");
+      return;
+    }
+
     try {
       const recipient = chat.participants.find((p) => p._id !== currentUser.id);
       if (!recipient) {
