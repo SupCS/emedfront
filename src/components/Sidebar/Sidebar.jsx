@@ -1,11 +1,20 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
+import { getUnreadCounts } from "../../api/chatApi";
+import { socket } from "../../api/socket";
+import {
+  setUnreadMessages,
+  incrementUnreadMessages,
+} from "../../store/unreadMessagesSlice";
 import styles from "./Sidebar.module.css";
 
 const Sidebar = () => {
   const [currentUser, setCurrentUser] = useState(null);
+  const unreadTotal = useSelector((state) => state.unreadMessages);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,11 +23,37 @@ const Sidebar = () => {
       try {
         const decoded = jwtDecode(token);
         setCurrentUser({ id: decoded.id, role: decoded.role });
+
+        // Отримуємо кількість непрочитаних повідомлень при першому завантаженні
+        fetchUnreadMessages(decoded.id);
+
+        // Підписуємось на сокети
+        socket.on("receiveMessage", (message) => {
+          console.log("Отримано нове повідомлення:", message);
+          dispatch(incrementUnreadMessages()); // Збільшуємо лічильник
+        });
+
+        return () => {
+          socket.off("receiveMessage");
+        };
       } catch (error) {
         toast.error("Помилка декодування токена");
       }
     }
-  }, []);
+  }, [dispatch]);
+
+  const fetchUnreadMessages = async (userId) => {
+    try {
+      const unreadCounts = await getUnreadCounts(userId);
+      const totalUnread = Object.values(unreadCounts).reduce(
+        (sum, count) => sum + count,
+        0
+      );
+      dispatch(setUnreadMessages(totalUnread));
+    } catch (error) {
+      console.error("Помилка отримання непрочитаних повідомлень:", error);
+    }
+  };
 
   const handleLogout = () => {
     try {
@@ -57,7 +92,12 @@ const Sidebar = () => {
             className={({ isActive }) => (isActive ? styles.active : "")}
           >
             <i className="fa fa-comments"></i>
-            <span className={styles.navText}>Чати</span>
+            <span className={styles.navText}>
+              Чати{" "}
+              {unreadTotal > 0 && (
+                <span className={styles.unreadBadge}>{unreadTotal}</span>
+              )}
+            </span>
           </NavLink>
         </li>
         {currentUser ? (

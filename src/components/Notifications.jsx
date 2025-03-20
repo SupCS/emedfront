@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const Notifications = () => {
   const notifications = useSelector(
-    (state) => state.notifications.filter((n) => n.type === "chat") // ✅ Беремо тільки чат-нотифікації
+    (state) => state.notifications.filter((n) => n.type === "chat") // Беремо тільки чат-нотифікації
   );
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ const Notifications = () => {
   const handleNotificationClick = (notif, closeToast) => {
     console.log("🔗 Перехід до чату:", notif);
     if (notif.chatId) {
-      navigate(`/chat?chatId=${notif.chatId}`); // ✅ Перехід у чат через URL
+      navigate(`/chat?chatId=${notif.chatId}`);
     } else {
       console.warn("⚠️ chatId undefined у сповіщенні:", notif);
     }
@@ -33,7 +33,7 @@ const Notifications = () => {
         toast.info(
           <CustomToast notif={notif} onClick={handleNotificationClick} />,
           {
-            closeOnClick: false, // ✅ Не закриваємо при випадковому кліку
+            closeOnClick: false,
             autoClose: 5000,
             onClose: () => {
               dispatch(removeNotification(notif.id));
