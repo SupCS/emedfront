@@ -12,6 +12,7 @@ import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import DoctorListPage from "../pages/DoctorListPage";
 import PrescriptionsPage from "../pages/PrescriptionsPage/PrescriptionsPage";
 import ChatPage from "../pages/ChatPage/ChatPage";
+import AppointmentsPage from "../pages/AppointmentsPage/AppointmentsPage";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Notifications from "../components/Notifications";
 import styles from "./AppRouter.module.css";
@@ -79,6 +80,14 @@ function AppRouter() {
             element={
               <PrivateRoute>
                 <ChatPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/appointments"
+            element={
+              <PrivateRoute>
+                <AppointmentsPage />
               </PrivateRoute>
             }
           />
