@@ -81,6 +81,25 @@ function AppointmentsList({ appointments, role, onStatusUpdate }) {
                       </button>
                     </div>
                   )}
+
+                  {["doctor", "patient"].includes(role) &&
+                    appt.status === "confirmed" && (
+                      <div className={styles.buttonGroup}>
+                        <button
+                          className={styles.cancelButton}
+                          onClick={() => {
+                            const confirmed = window.confirm(
+                              "Ви впевнені, що хочете скасувати підтверджений запис? Це незворотна дія."
+                            );
+                            if (confirmed) {
+                              handleStatusChange(appt._id, "cancelled");
+                            }
+                          }}
+                        >
+                          Скасувати
+                        </button>
+                      </div>
+                    )}
                 </div>
               </li>
             );

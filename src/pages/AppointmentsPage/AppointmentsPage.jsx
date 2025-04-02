@@ -41,18 +41,27 @@ const AppointmentsPage = () => {
     fetchAppointments();
   }, [id, role, navigate]);
 
-  const filteredAppointments = appointments
-    .filter((appt) =>
-      activeTab === "upcoming"
-        ? ["pending", "confirmed"].includes(appt.status)
-        : ["cancelled", "passed"].includes(appt.status)
-    )
-    .sort(
-      (a, b) =>
-        activeTab === "upcoming"
-          ? new Date(a.date) - new Date(b.date) // Звичайне зростання
-          : new Date(b.date) - new Date(a.date) // Зворотне сортування для минулих
-    );
+  const filteredAppointments = [...appointments]
+    .filter((appt) => {
+      if (activeTab === "upcoming") {
+        return ["pending", "confirmed"].includes(appt.status);
+      } else if (activeTab === "past") {
+        return appt.status === "passed";
+      } else if (activeTab === "cancelled") {
+        return appt.status === "cancelled";
+      }
+      return false;
+    })
+    .sort((a, b) => {
+      if (activeTab === "upcoming") {
+        if (a.status !== b.status) {
+          return a.status === "pending" ? -1 : 1;
+        }
+        return new Date(a.date) - new Date(b.date);
+      } else if (activeTab === "past") {
+        return new Date(b.date) - new Date(a.date);
+      }
+    });
 
   const handleStatusUpdate = (appointmentId, newStatus) => {
     setAppointments((prev) =>
@@ -82,6 +91,14 @@ const AppointmentsPage = () => {
           onClick={() => setActiveTab("past")}
         >
           Минулі
+        </button>
+        <button
+          className={`${styles.tab} ${
+            activeTab === "cancelled" ? styles.activeTab : ""
+          }`}
+          onClick={() => setActiveTab("cancelled")}
+        >
+          Скасовані
         </button>
       </div>
 

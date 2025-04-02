@@ -28,3 +28,10 @@ export const updateAppointmentStatus = async (appointmentId, status) => {
     axiosInstance.patch(`/appointments/${appointmentId}/status`, { status })
   );
 };
+
+// Скасування підтвердженого appointment
+export const cancelConfirmedAppointment = async (appointmentId) => {
+  return handleRequest(
+    axiosInstance.patch(`/appointments/${appointmentId}/cancel`)
+  );
+};
