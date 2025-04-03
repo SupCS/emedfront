@@ -51,6 +51,27 @@ export const connectSocket = () => {
       }
     });
 
+    socket.on("appointmentStart", ({ message, appointmentId, chatId }) => {
+      console.log("📅 Отримано сповіщення про початок прийому:", {
+        message,
+        appointmentId,
+        chatId,
+      });
+
+      console.log("📥 Обробляємо appointmentStart подію!");
+      console.log("🔻 Дані:", { message, appointmentId, chatId });
+
+      store.dispatch(
+        addNotification({
+          id: `appt-${appointmentId}`,
+          chatId,
+          senderName: "Система",
+          content: message,
+          type: "appointment",
+        })
+      );
+    });
+
     socket.on("connect_error", (err) => {
       console.error("🔴 Помилка WebSocket:", err);
     });

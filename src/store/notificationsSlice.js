@@ -6,6 +6,7 @@ const notificationsSlice = createSlice({
   reducers: {
     addNotification: (state, action) => {
       console.log("🟢 Додаємо сповіщення в Redux:", action.payload);
+      console.log("📊 Поточна кількість сповіщень у state:", state.length + 1);
       if (!action.payload.chatId) {
         console.warn(
           "⚠️ Попередження: сповіщення не має `chatId`!",

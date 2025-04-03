@@ -6,9 +6,7 @@ import { removeNotification } from "../store/notificationsSlice";
 import "react-toastify/dist/ReactToastify.css";
 
 const Notifications = () => {
-  const notifications = useSelector(
-    (state) => state.notifications.filter((n) => n.type === "chat") // Беремо тільки чат-нотифікації
-  );
+  const notifications = useSelector((state) => state.notifications);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const shownNotifications = useRef(new Set());
@@ -51,6 +49,9 @@ const Notifications = () => {
 };
 
 const CustomToast = ({ notif, onClick }) => {
+  const isChat = notif.type === "chat";
+  const isAppointment = notif.type === "appointment";
+
   return (
     <div
       onClick={(e) => onClick(notif, () => toast.dismiss())}
@@ -61,7 +62,10 @@ const CustomToast = ({ notif, onClick }) => {
         background: "#f8f9fa",
       }}
     >
-      <strong>Нове повідомлення від {notif.senderName}</strong>
+      <strong>
+        {isChat && `Нове повідомлення від ${notif.senderName}`}
+        {isAppointment && `Починається прийом`}
+      </strong>
       <p>{notif.content}</p>
     </div>
   );
