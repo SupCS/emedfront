@@ -116,6 +116,17 @@ const Sidebar = () => {
             <span className={styles.navText}>Мій профіль</span>
           </li>
         )}
+        {currentUser && (
+          <li>
+            <NavLink
+              to="/appointments"
+              className={({ isActive }) => (isActive ? styles.active : "")}
+            >
+              <i className="fa fa-calendar-check"></i>
+              <span className={styles.navText}>Мої записи</span>
+            </NavLink>
+          </li>
+        )}
       </ul>
       <ul className={styles.logout}>
         <li>
