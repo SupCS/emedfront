@@ -1,5 +1,9 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { getChatMessages, markChatAsRead } from "../../api/chatApi";
+import {
+  getChatMessages,
+  markChatAsRead,
+  getCurrentAppointment,
+} from "../../api/chatApi";
 import { socket, connectSocket, sendMessageSocket } from "../../api/socket";
 import { toast } from "react-toastify";
 import styles from "./ChatWindow.module.css";
@@ -8,6 +12,7 @@ const ChatWindow = ({ chat, currentUser }) => {
   const [messages, setMessages] = useState([]); // Список повідомлень
   const [newMessage, setNewMessage] = useState(""); // Поточне введене повідомлення
   const messagesEndRef = useRef(null); // Референс для автоматичної прокрутки вниз
+  const [isAppointmentActive, setIsAppointmentActive] = useState(false);
 
   useEffect(() => {
     if (!chat || !currentUser) return;
@@ -27,6 +32,18 @@ const ChatWindow = ({ chat, currentUser }) => {
     };
 
     fetchMessages();
+
+    const checkAppointmentStatus = async () => {
+      try {
+        const res = await getCurrentAppointment(chat._id);
+        console.log(res);
+        setIsAppointmentActive(res.isActive);
+      } catch (err) {
+        console.error("Помилка при перевірці апоінтменту:", err.message);
+      }
+    };
+
+    checkAppointmentStatus();
 
     return () => {
       socket.off("receiveMessage");
@@ -69,6 +86,20 @@ const ChatWindow = ({ chat, currentUser }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    const handleAppointmentStart = (payload) => {
+      if (payload.chatId === chat._id) {
+        setIsAppointmentActive(true);
+      }
+    };
+
+    socket.on("appointmentStart", handleAppointmentStart);
+
+    return () => {
+      socket.off("appointmentStart", handleAppointmentStart);
+    };
+  }, [chat]);
+
   // Функція відправлення повідомлення
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
@@ -105,11 +136,22 @@ const ChatWindow = ({ chat, currentUser }) => {
 
   return (
     <div className={styles.chatWindow}>
-      <h3>
-        Чат з{" "}
-        {chat.participants.find((p) => p._id !== currentUser.id)?.name ||
-          "Невідомий"}
-      </h3>
+      <div className={styles.chatHeader}>
+        <h3 className={styles.chatTitle}>
+          Чат з{" "}
+          {chat.participants.find((p) => p._id !== currentUser.id)?.name ||
+            "Невідомий"}
+        </h3>
+
+        {isAppointmentActive && (
+          <div className={styles.videoButtonWrapper}>
+            <button className={styles.videoButton}>
+              Приєднатись до відеоконференції
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className={styles.messages}>
         {messages.map((msg) => (
           <div key={msg._id} className={styles.message}>

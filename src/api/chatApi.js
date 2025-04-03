@@ -41,3 +41,8 @@ export const createChat = async (
     })
   );
 };
+
+export const getCurrentAppointment = async (chatId) => {
+  const response = await axiosInstance.get(`/appointments/active/${chatId}`);
+  return response.data; // { appointment, isActive: true/false }
+};

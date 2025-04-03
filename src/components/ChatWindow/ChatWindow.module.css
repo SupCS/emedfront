@@ -35,3 +35,39 @@
   color: white;
   cursor: pointer;
 }
+
+.videoButtonContainer {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.chatHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.chatTitle {
+  margin: 0;
+  font-size: 18px;
+}
+
+.videoButtonWrapper {
+  flex-shrink: 0;
+}
+
+.videoButton {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.videoButton:hover {
+  background-color: #388e3c;
+}
