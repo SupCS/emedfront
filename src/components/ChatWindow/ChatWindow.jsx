@@ -13,6 +13,7 @@ const ChatWindow = ({ chat, currentUser }) => {
   const [newMessage, setNewMessage] = useState(""); // Поточне введене повідомлення
   const messagesEndRef = useRef(null); // Референс для автоматичної прокрутки вниз
   const [isAppointmentActive, setIsAppointmentActive] = useState(false);
+  const [callId, setCallId] = useState(null);
 
   useEffect(() => {
     if (!chat || !currentUser) return;
@@ -38,6 +39,7 @@ const ChatWindow = ({ chat, currentUser }) => {
         const res = await getCurrentAppointment(chat._id);
         console.log(res);
         setIsAppointmentActive(res.isActive);
+        setCallId(res.firestoreCallId || null);
       } catch (err) {
         console.error("Помилка при перевірці апоінтменту:", err.message);
       }
@@ -90,6 +92,7 @@ const ChatWindow = ({ chat, currentUser }) => {
     const handleAppointmentStart = (payload) => {
       if (payload.chatId === chat._id) {
         setIsAppointmentActive(true);
+        setCallId(payload.firestoreCallId || null);
       }
     };
 
@@ -143,11 +146,16 @@ const ChatWindow = ({ chat, currentUser }) => {
             "Невідомий"}
         </h3>
 
-        {isAppointmentActive && (
+        {isAppointmentActive && callId && (
           <div className={styles.videoButtonWrapper}>
-            <button className={styles.videoButton}>
+            <a
+              className={styles.videoButton}
+              href={`/video/${callId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Приєднатись до відеоконференції
-            </button>
+            </a>
           </div>
         )}
       </div>

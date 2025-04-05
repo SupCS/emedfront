@@ -13,6 +13,7 @@ import DoctorListPage from "../pages/DoctorListPage";
 import PrescriptionsPage from "../pages/PrescriptionsPage/PrescriptionsPage";
 import ChatPage from "../pages/ChatPage/ChatPage";
 import AppointmentsPage from "../pages/AppointmentsPage/AppointmentsPage";
+import VideoCallPage from "../pages/VideoCallPage/VideoCallPage";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Notifications from "../components/Notifications";
 import styles from "./AppRouter.module.css";
@@ -88,6 +89,14 @@ function AppRouter() {
             element={
               <PrivateRoute>
                 <AppointmentsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/video/:callId"
+            element={
+              <PrivateRoute>
+                <VideoCallPage />
               </PrivateRoute>
             }
           />
