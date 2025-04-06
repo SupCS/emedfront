@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom";
+import VideoRoom from "../../components/VideoRoom/VideoRoom";
 
 const VideoCallPage = () => {
   const { callId } = useParams();
@@ -9,7 +10,7 @@ const VideoCallPage = () => {
       <p>
         Ви приєднались до кімнати: <strong>{callId}</strong>
       </p>
-      {/* Тут буде компонент з WebRTC */}
+      <VideoRoom />;
     </div>
   );
 };
