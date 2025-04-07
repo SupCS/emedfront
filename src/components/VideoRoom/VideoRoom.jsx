@@ -1,17 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { db } from "../../firebaseConfig";
-import {
-  collection,
-  doc,
-  onSnapshot,
-  setDoc,
-  updateDoc,
-  deleteField,
-  getDocs,
-  deleteDoc,
-} from "firebase/firestore";
 import { useNavigate, useParams } from "react-router-dom";
 import { checkCallAccess } from "../../api/callApi";
+import { socket } from "../../api/socket";
+import { toast } from "react-toastify";
 import styles from "./VideoRoom.module.css";
 
 const servers = {
@@ -19,24 +10,20 @@ const servers = {
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
   ],
-  iceCandidatePoolSize: 10,
 };
 
 const VideoRoom = () => {
   const { callId } = useParams();
   const navigate = useNavigate();
   const [currentRole, setCurrentRole] = useState(null);
-  const [peerConnection, setPeerConnection] = useState(null);
   const [cameraEnabled, setCameraEnabled] = useState(true);
   const [micEnabled, setMicEnabled] = useState(true);
   const [localStream, setLocalStream] = useState(null);
-  const [remoteStream, setRemoteStream] = useState(new MediaStream());
+  const [remoteStream, setRemoteStream] = useState(null);
+  const pcRef = useRef(null);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
-
-  const remoteDescriptionSet = useRef(false);
-  const candidateQueue = useRef([]);
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -49,234 +36,129 @@ const VideoRoom = () => {
         navigate("/");
       }
     };
-
     checkAccess();
   }, [callId, navigate]);
 
   useEffect(() => {
-    const init = async () => {
-      const pc = new RTCPeerConnection(servers);
-      setPeerConnection(pc);
+    if (!currentRole) return;
 
-      let local;
+    const pc = new RTCPeerConnection(servers);
+    pcRef.current = pc;
+    const stream = new MediaStream();
+    setRemoteStream(stream);
+
+    const start = async () => {
       try {
-        local = await navigator.mediaDevices.getUserMedia({
+        const local = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
         });
-        local
-          .getVideoTracks()
-          .forEach((track) => (track.enabled = cameraEnabled));
-        local.getAudioTracks().forEach((track) => (track.enabled = micEnabled));
-        console.log("🎥 Отримано локальні треки:", local.getTracks());
-      } catch (err) {
-        console.warn("⚠️ Не вдалося отримати доступ до відео/аудіо:", err);
-        local = new MediaStream();
-      }
+        setLocalStream(local);
+        local.getTracks().forEach((track) => {
+          console.log(`🎥 Додаємо локальний трек: ${track.kind}`);
+          pc.addTrack(track, local);
+        });
 
-      setLocalStream(local);
-      local.getTracks().forEach((track) => {
-        console.log("🎤 Додаємо локальний трек:", track.kind);
-        pc.addTrack(track, local);
-      });
-
-      if (localVideoRef.current) {
         localVideoRef.current.srcObject = local;
+        console.log("🎬 Локальний потік встановлено");
+      } catch (err) {
+        console.error("🚫 Помилка доступу до камери/мікрофона:", err);
       }
 
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = remoteStream;
-        remoteVideoRef.current.muted = false;
-        remoteVideoRef.current.volume = 1.0;
-        console.log("🔊 Установлено звук для remoteVideo");
-      }
-
-      pc.ontrack = (event) => {
-        console.log("📥 Отримано remote track:", event.track.kind);
-        event.streams[0].getTracks().forEach((track) => {
-          const alreadyExists = remoteStream
-            .getTracks()
-            .some((t) => t.id === track.id);
-          if (!alreadyExists) {
-            console.log("➡️ Додаємо трек до remoteStream:", track.kind);
-            remoteStream.addTrack(track);
-          }
-        });
-
-        remoteVideoRef.current.srcObject = remoteStream;
-
-        remoteStream.getTracks().forEach((t) => {
-          console.log(
-            `🛰️ Remote ${t.kind} — enabled: ${t.enabled}, state: ${t.readyState}`
-          );
-        });
-      };
-
-      pc.oniceconnectionstatechange = () => {
-        console.log("❄️ ICE Connection State:", pc.iceConnectionState);
-      };
-
-      pc.onconnectionstatechange = () => {
-        console.log("📡 Connection State:", pc.connectionState);
-      };
-
-      const callDoc = doc(collection(db, "calls"), callId);
-      const offerCandidates = collection(callDoc, "offerCandidates");
-      const answerCandidates = collection(callDoc, "answerCandidates");
-
-      pc.onicecandidate = async (event) => {
-        if (event.candidate) {
-          const target =
-            currentRole === "doctor" ? offerCandidates : answerCandidates;
-          console.log("🧊 Новий ICE кандидат:", event.candidate);
-          await setDoc(doc(target), event.candidate.toJSON());
-        }
-      };
-
-      const handleCandidate = (candidateData) => {
-        if (!remoteDescriptionSet.current) {
-          console.log(
-            "⏳ Черга ICE (ще немає remoteDescription):",
-            candidateData
-          );
-          candidateQueue.current.push(candidateData);
-        } else {
-          console.log("📬 Додаємо ICE одразу:", candidateData);
-          pc.addIceCandidate(new RTCIceCandidate(candidateData));
-        }
-      };
-
-      onSnapshot(offerCandidates, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === "added" && currentRole === "patient") {
-            handleCandidate(change.doc.data());
-          }
-        });
-      });
-
-      onSnapshot(answerCandidates, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === "added" && currentRole === "doctor") {
-            handleCandidate(change.doc.data());
-          }
-        });
-      });
-
-      onSnapshot(callDoc, async (snapshot) => {
-        const data = snapshot.data();
-
-        if (currentRole === "doctor" && !data?.offer) {
-          await setDoc(callDoc, {}, { merge: true });
-          const offerDescription = await pc.createOffer();
-          await pc.setLocalDescription(offerDescription);
-          const offer = {
-            sdp: offerDescription.sdp,
-            type: offerDescription.type,
-          };
-          console.log("📨 Відправляємо offer:", offer);
-          await updateDoc(callDoc, { offer });
-        }
-
-        if (
-          currentRole === "patient" &&
-          data?.offer &&
-          !pc.currentRemoteDescription
-        ) {
-          console.log("📩 Отримано offer:", data.offer);
-          await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-          remoteDescriptionSet.current = true;
-          console.log("✅ setRemoteDescription виконано");
-
-          for (const c of candidateQueue.current) {
-            console.log("🧊 Додаємо кандидат з черги:", c);
-            await pc.addIceCandidate(new RTCIceCandidate(c));
-          }
-          candidateQueue.current = [];
-
-          const answerDescription = await pc.createAnswer();
-          await pc.setLocalDescription(answerDescription);
-          const answer = {
-            type: answerDescription.type,
-            sdp: answerDescription.sdp,
-          };
-          console.log("📨 Відправляємо answer:", answer);
-          await updateDoc(callDoc, { answer });
-        }
-
-        if (
-          currentRole === "doctor" &&
-          data?.answer &&
-          !pc.currentRemoteDescription
-        ) {
-          console.log("📩 Отримано answer:", data.answer);
-          await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-          remoteDescriptionSet.current = true;
-          console.log("✅ setRemoteDescription виконано");
-
-          for (const c of candidateQueue.current) {
-            console.log("🧊 Додаємо кандидат з черги:", c);
-            await pc.addIceCandidate(new RTCIceCandidate(c));
-          }
-          candidateQueue.current = [];
-        }
-      });
+      socket.emit("join-room", { callId });
+      console.log(`🚪 Відправлено join-room → callId: ${callId}`);
     };
 
-    if (currentRole && callId) {
-      init();
-    }
-  }, [currentRole, callId]);
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        console.log("🧊 Відправляємо ICE кандидат:", event.candidate);
+        socket.emit("ice-candidate", { callId, candidate: event.candidate });
+      }
+    };
 
-  const leaveRoom = async () => {
-    console.log("🚪 Вихід з кімнати");
+    pc.ontrack = (event) => {
+      console.log("📥 Отримано remote track:", event.track.kind);
+      event.streams[0].getTracks().forEach((track) => {
+        stream.addTrack(track);
+      });
+      remoteVideoRef.current.srcObject = stream;
+    };
 
-    localStream?.getTracks().forEach((track) => track.stop());
-    peerConnection?.close();
+    socket.on("user-joined", async ({ socketId }) => {
+      console.log("👤 Користувач приєднався:", socketId);
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      console.log("📨 Відправляємо offer:", offer);
+      socket.emit("offer", { callId, offer });
+    });
 
-    const callDoc = doc(collection(db, "calls"), callId);
-    const offerCandidates = collection(callDoc, "offerCandidates");
-    const answerCandidates = collection(callDoc, "answerCandidates");
+    socket.on("user-left", ({ socketId }) => {
+      console.log("🚪 Користувач вийшов з кімнати:", socketId);
+      toast.info("Опонент залишив кімнату");
+    });
 
-    try {
-      // Видаляємо підколекції кандидатів
-      const offerSnap = await getDocs(offerCandidates);
-      offerSnap.forEach(async (doc) => await deleteDoc(doc.ref));
+    socket.on("offer", async ({ offer, from }) => {
+      console.log("📩 Отримано offer від:", from);
+      await pc.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      console.log("📨 Відправляємо answer:", answer);
+      socket.emit("answer", { callId, answer });
+    });
 
-      const answerSnap = await getDocs(answerCandidates);
-      answerSnap.forEach(async (doc) => await deleteDoc(doc.ref));
+    socket.on("answer", async ({ answer }) => {
+      console.log("📩 Отримано answer");
+      await pc.setRemoteDescription(new RTCSessionDescription(answer));
+    });
 
-      // Видаляємо SDP offer/answer
-      await updateDoc(callDoc, {
-        offer: deleteField(),
-        answer: deleteField(),
+    socket.on("ice-candidate", async ({ candidate }) => {
+      try {
+        console.log("📬 Отримано ICE кандидат:", candidate);
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (err) {
+        console.error("⚠️ Помилка додавання ICE:", err);
+      }
+    });
+
+    start();
+
+    return () => {
+      console.log("🚫 Вихід із кімнати");
+      localStream?.getTracks().forEach((track) => {
+        track.stop();
+        console.log(`🛑 Зупинено трек: ${track.kind}`);
       });
 
-      console.log("🧹 Очищено callDoc від SDP та кандидатів");
-    } catch (err) {
-      console.warn("⚠️ Не вдалося очистити кімнату:", err);
-    }
+      pc.close();
+      socket.emit("leave-room", { callId });
+      socket.off("user-joined");
+      socket.off("user-left");
+      socket.off("offer");
+      socket.off("answer");
+      socket.off("ice-candidate");
+    };
+  }, [currentRole, callId]);
 
+  const leaveRoom = () => {
     navigate("/");
   };
 
   const toggleMic = () => {
-    if (!localStream) return;
-    const audioTrack = localStream.getAudioTracks()[0];
-    if (!audioTrack) return;
-
-    audioTrack.enabled = !audioTrack.enabled;
-    setMicEnabled(audioTrack.enabled);
-    console.log("🎙️ Мікрофон:", audioTrack.enabled ? "Увімкнено" : "Вимкнено");
+    const track = localStream?.getAudioTracks()[0];
+    if (track) {
+      track.enabled = !track.enabled;
+      setMicEnabled(track.enabled);
+      console.log(`🎙️ Мікрофон: ${track.enabled ? "Увімкнено" : "Вимкнено"}`);
+    }
   };
 
   const toggleCamera = () => {
-    if (!localStream) return;
-    const videoTrack = localStream.getVideoTracks()[0];
-    if (!videoTrack) return;
-
-    videoTrack.enabled = !videoTrack.enabled;
-    setCameraEnabled(videoTrack.enabled);
-    console.log("📷 Камера:", videoTrack.enabled ? "Увімкнено" : "Вимкнено");
+    const track = localStream?.getVideoTracks()[0];
+    if (track) {
+      track.enabled = !track.enabled;
+      setCameraEnabled(track.enabled);
+      console.log(`📷 Камера: ${track.enabled ? "Увімкнено" : "Вимкнено"}`);
+    }
   };
 
   return (
@@ -309,20 +191,14 @@ const VideoRoom = () => {
       </div>
 
       <div className={styles.controls}>
-        <button
-          onClick={toggleMic}
-          disabled={!localStream || !localStream.getAudioTracks().length}
-        >
+        <button onClick={toggleMic}>
           {micEnabled ? "🔇 Вимкнути мікрофон" : "🎙️ Увімкнути мікрофон"}
         </button>
-        <button
-          onClick={toggleCamera}
-          disabled={!localStream || !localStream.getVideoTracks().length}
-        >
+        <button onClick={toggleCamera}>
           {cameraEnabled ? "📷 Вимкнути камеру" : "📹 Увімкнути камеру"}
         </button>
         <button onClick={leaveRoom} className={styles.leaveButton}>
-          Вийти з кімнати
+          🚪 Вийти з кімнати
         </button>
       </div>
     </div>
