@@ -111,7 +111,10 @@ function DoctorModal({ doctor, isOpen, onClose }) {
           <strong>Спеціалізація:</strong> {doctor.specialization}
         </p>
         <p>
-          <strong>Рейтинг:</strong> {doctor.rating} ⭐
+          <strong>Рейтинг:</strong>{" "}
+          {doctor.rating !== null
+            ? `${doctor.rating} ⭐ (${doctor.ratingCount})`
+            : "Немає оцінок"}
         </p>
         <p>
           <strong>Біографія:</strong> {doctor.bio}

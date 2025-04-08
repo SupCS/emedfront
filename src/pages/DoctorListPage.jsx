@@ -105,6 +105,7 @@ function DoctorListPage() {
                 name={doctor.name}
                 specialization={doctor.specialization}
                 rating={doctor.rating}
+                ratingCount={doctor.ratingCount}
                 avatar={doctor.avatar ? getAvatarUrl(doctor.avatar) : null}
               />
             </div>

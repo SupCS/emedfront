@@ -71,6 +71,16 @@ const AppointmentsPage = () => {
     );
   };
 
+  const handleMarkAsRated = (appointmentId, ratingValue) => {
+    setAppointments((prev) =>
+      prev.map((appt) =>
+        appt._id === appointmentId
+          ? { ...appt, isRated: true, ratingValue }
+          : appt
+      )
+    );
+  };
+
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>Мої записи</h2>
@@ -109,6 +119,7 @@ const AppointmentsPage = () => {
           appointments={filteredAppointments}
           role={role}
           onStatusUpdate={handleStatusUpdate}
+          onRated={handleMarkAsRated}
         />
       )}
     </div>

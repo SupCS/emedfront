@@ -1,6 +1,8 @@
 import styles from "./AppointmentsList.module.css";
 import { updateAppointmentStatus } from "../../api/appointmentApi";
 import { toast } from "react-toastify";
+import { useState } from "react";
+import RatingModal from "../RatingModal/RatingModal";
 
 const statusStyles = {
   pending: { color: "#ffc107", label: "Очікує підтвердження" },
@@ -9,7 +11,10 @@ const statusStyles = {
   passed: { color: "#007bff", label: "Завершено" },
 };
 
-function AppointmentsList({ appointments, role, onStatusUpdate }) {
+function AppointmentsList({ appointments, role, onStatusUpdate, onRated }) {
+  console.log(appointments);
+  const [ratingAppointmentId, setRatingAppointmentId] = useState(null);
+
   const handleStatusChange = async (appointmentId, newStatus) => {
     try {
       await updateAppointmentStatus(appointmentId, newStatus);
@@ -24,6 +29,12 @@ function AppointmentsList({ appointments, role, onStatusUpdate }) {
       }
     } catch (error) {
       toast.error(error.message || "Не вдалося оновити статус");
+    }
+  };
+
+  const handleRated = (appointmentId, value) => {
+    if (onRated) {
+      onRated(appointmentId, value);
     }
   };
 
@@ -100,6 +111,21 @@ function AppointmentsList({ appointments, role, onStatusUpdate }) {
                         </button>
                       </div>
                     )}
+
+                  {role === "patient" &&
+                    appt.status === "passed" &&
+                    (appt.isRated && appt.ratingValue ? (
+                      <div className={styles.ratingDisplay}>
+                        Ваша оцінка: {appt.ratingValue} ★
+                      </div>
+                    ) : (
+                      <button
+                        className={styles.rateButton}
+                        onClick={() => setRatingAppointmentId(appt._id)}
+                      >
+                        Оцінити
+                      </button>
+                    ))}
                 </div>
               </li>
             );
@@ -107,6 +133,18 @@ function AppointmentsList({ appointments, role, onStatusUpdate }) {
         </ul>
       ) : (
         <p>Немає записів для відображення.</p>
+      )}
+
+      {ratingAppointmentId && (
+        <RatingModal
+          isOpen={Boolean(ratingAppointmentId)}
+          appointmentId={ratingAppointmentId}
+          onClose={() => setRatingAppointmentId(null)}
+          onRated={(value) => {
+            handleRated(ratingAppointmentId, value);
+            setRatingAppointmentId(null);
+          }}
+        />
       )}
     </div>
   );

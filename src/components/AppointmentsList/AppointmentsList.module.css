@@ -56,3 +56,23 @@
   border-radius: 5px;
   cursor: pointer;
 }
+
+.rateButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.rateButton:hover {
+  background-color: #0056b3;
+}
+
+.ratingDisplay {
+  font-weight: 500;
+  color: #333;
+  margin-top: 0.3rem;
+}

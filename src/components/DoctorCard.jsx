@@ -1,4 +1,4 @@
-function DoctorCard({ name, specialization, rating, avatar }) {
+function DoctorCard({ name, specialization, rating, ratingCount, avatar }) {
   return (
     <div style={cardStyle}>
       <img
@@ -11,7 +11,10 @@ function DoctorCard({ name, specialization, rating, avatar }) {
         <strong>Спеціалізація:</strong> {specialization}
       </p>
       <p>
-        <strong>Рейтинг:</strong> {rating} ⭐
+        <strong>Рейтинг:</strong>{" "}
+        {rating !== null
+          ? `${rating} ⭐ (${ratingCount || 0})`
+          : "Немає оцінок"}
       </p>
     </div>
   );
