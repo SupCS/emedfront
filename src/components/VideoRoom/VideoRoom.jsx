@@ -21,6 +21,7 @@ const VideoRoom = () => {
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
   const pcRef = useRef(null);
+  const [isRemoteConnected, setIsRemoteConnected] = useState(false);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -82,6 +83,7 @@ const VideoRoom = () => {
         stream.addTrack(track);
       });
       remoteVideoRef.current.srcObject = stream;
+      setIsRemoteConnected(true);
     };
 
     socket.on("user-joined", async ({ socketId }) => {
@@ -95,8 +97,16 @@ const VideoRoom = () => {
     socket.on("user-left", ({ socketId }) => {
       console.log("🚪 Користувач вийшов з кімнати:", socketId);
       toast.info("Опонент залишив кімнату");
-    });
 
+      remoteStream?.getTracks().forEach((track) => {
+        remoteStream.removeTrack(track);
+      });
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = null;
+      }
+
+      setIsRemoteConnected(false);
+    });
     socket.on("offer", async ({ offer, from }) => {
       console.log("📩 Отримано offer від:", from);
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
@@ -181,12 +191,18 @@ const VideoRoom = () => {
         </div>
         <div>
           <p>Опонент</p>
-          <video
-            ref={remoteVideoRef}
-            autoPlay
-            playsInline
-            className={styles.video}
-          />
+          {isRemoteConnected ? (
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className={styles.video}
+            />
+          ) : (
+            <div className={styles.placeholder}>
+              Очікуємо підключення опонента...
+            </div>
+          )}
         </div>
       </div>
 
