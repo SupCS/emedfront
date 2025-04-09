@@ -18,17 +18,22 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import Notifications from "../components/Notifications";
 import styles from "./AppRouter.module.css";
 import PrivateRoute from "./PrivateRoute";
+import AIAssistantWidget from "../components/AIAssistant/AIAssistantWidget";
 
 const Layout = ({ children }) => {
   const location = useLocation();
-  const hideSidebar =
+
+  // Визначаємо, чи це публічна сторінка
+  const isPublicRoute =
     location.pathname === "/login" || location.pathname === "/register";
 
   return (
     <div className={styles.container}>
-      {!hideSidebar && <Sidebar />}
-      <div className={hideSidebar ? styles.fullContent : styles.content}>
+      {!isPublicRoute && <Sidebar />}
+      <div className={isPublicRoute ? styles.fullContent : styles.content}>
         {children}
+        {/* AI-помічник тільки на захищених сторінках */}
+        {!isPublicRoute && <AIAssistantWidget />}
       </div>
     </div>
   );
