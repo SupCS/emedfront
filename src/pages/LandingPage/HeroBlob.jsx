@@ -4,6 +4,7 @@ export default function HeroBlob({ children }) {
       viewBox="0 0 479 467"
       xmlns="http://www.w3.org/2000/svg"
       className="w-full h-auto"
+      style={{ width: "100%", height: "100%" }}
     >
       <mask id="mask0">
         <path

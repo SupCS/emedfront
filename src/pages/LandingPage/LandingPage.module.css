@@ -136,6 +136,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    order: -1;
   }
 
   .imageWrapper {
@@ -146,7 +147,7 @@
 
   .doctorImage {
     width: 100%;
-    transform: translateY(10%);
+    height: auto;
     object-fit: contain;
   }
 }
