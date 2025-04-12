@@ -5,7 +5,6 @@
   padding: 0rem 4rem;
   height: 100vh;
   background-color: #f9fbff;
-  height: 100vh;
   overflow: hidden;
   gap: 4rem;
 }
@@ -97,12 +96,51 @@
   font-weight: bold;
 }
 
+/* === SVG ICONS AROUND BLOB === */
+.iconsOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.iconChat,
+.iconVideo,
+.iconCalendar {
+  position: absolute;
+  width: 10%;
+  aspect-ratio: 1 / 1;
+  background-color: #d7efff;
+  border-radius: 12px;
+  padding: 1.5%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Icon positions */
+.iconChat {
+  bottom: 15%;
+  right: 15%;
+}
+
+.iconVideo {
+  top: 12%;
+  left: 5%;
+}
+
+.iconCalendar {
+  top: 5%;
+  right: 12%;
+}
+
+/* === Mobile === */
 @media (max-width: 768px) {
   .landing {
     flex-direction: column;
-    padding: 2rem 1.5rem;
+    padding: 0 1.5rem;
     text-align: center;
-    gap: 2rem;
+    gap: 1.5rem;
+    height: 100dvh;
+    overflow-y: auto;
   }
 
   .left {
@@ -149,5 +187,40 @@
     width: 100%;
     height: auto;
     object-fit: contain;
+    transform: translateY(10%);
+  }
+
+  .iconsOverlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .iconChat,
+  .iconVideo,
+  .iconCalendar {
+    position: absolute;
+    width: 10%;
+    aspect-ratio: 1 / 1;
+    background-color: #d7efff;
+    border-radius: 12px;
+    padding: 3%;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+  }
+
+  .iconChat {
+    bottom: 5%;
+    right: 8%;
+  }
+
+  .iconVideo {
+    top: 10%;
+    left: 8%;
+  }
+
+  .iconCalendar {
+    top: 4%;
+    right: 8%;
   }
 }
