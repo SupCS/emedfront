@@ -14,6 +14,7 @@ import PrescriptionsPage from "../pages/PrescriptionsPage/PrescriptionsPage";
 import ChatPage from "../pages/ChatPage/ChatPage";
 import AppointmentsPage from "../pages/AppointmentsPage/AppointmentsPage";
 import VideoCallPage from "../pages/VideoCallPage/VideoCallPage";
+import LandingPage from "../pages/LandingPage/LandingPage";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Notifications from "../components/Notifications";
 import styles from "./AppRouter.module.css";
@@ -25,7 +26,9 @@ const Layout = ({ children }) => {
 
   // Визначаємо, чи це публічна сторінка
   const isPublicRoute =
-    location.pathname === "/login" || location.pathname === "/register";
+    location.pathname === "/login" ||
+    location.pathname === "/register" ||
+    location.pathname === "/";
 
   return (
     <div className={styles.container}>
@@ -47,6 +50,7 @@ function AppRouter() {
           {/* Публічні маршрути */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/" element={<LandingPage />} />
 
           {/* Приватні маршрути */}
           <Route
