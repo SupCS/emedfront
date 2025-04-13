@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getUserProfile } from "../../api/profileApi";
-import ProfileInfo from "../../components/ProfileInfo/ProfileInfo";
-import LogoutButton from "../../components/LogoutButton/LogoutButton";
-import DoctorSchedule from "../../components/DoctorSchedule";
 import Loader from "../../components/Loader/Loader";
+import LogoutButton from "../../components/LogoutButton/LogoutButton";
+import AvatarUploader from "../../components/AvatarUploader/AvatarUploader";
+import DoctorProfileContent from "../../components/Profile/DoctorProfileContent";
+import PatientProfileContent from "../../components/Profile/PatientProfileContent";
+import DoctorProfileInfo from "../../components/Profile/DoctorProfileInfo";
+import PatientProfileInfo from "../../components/Profile/PatientProfileInfo";
+import { getAvatarUrl } from "../../api/avatarApi";
 import { toast } from "react-toastify";
 import styles from "./ProfilePage.module.css";
-import AvatarUploader from "../../components/AvatarUploader/AvatarUploader";
-import { getAvatarUrl } from "../../api/avatarApi";
 
 function ProfilePage() {
   const { role, id } = useParams();
@@ -50,6 +52,18 @@ function ProfilePage() {
     navigate("/login");
   };
 
+  const renderProfileInfo = () => {
+    if (role === "doctor") {
+      return <DoctorProfileInfo profile={profile} />;
+    }
+
+    if (role === "patient") {
+      return <PatientProfileInfo profile={profile} />;
+    }
+
+    return null;
+  };
+
   return (
     <div className={styles.pageContainer}>
       {loading ? (
@@ -61,27 +75,17 @@ function ProfilePage() {
               <img src={avatar} alt="Аватар" className={styles.avatar} />
               {isOwner && <AvatarUploader onUpdate={handleAvatarUpdate} />}
             </div>
-            <ProfileInfo profile={profile} role={role} />
+            {renderProfileInfo()}
           </div>
 
-          {role === "doctor" && <DoctorSchedule doctorId={id} />}
-          {role === "patient" && isOwner && (
-            <button
-              className={styles.prescriptionsButton}
-              onClick={() => navigate(`/profile/patient/${id}/prescriptions`)}
-            >
-              Мої призначення
-            </button>
+          {role === "doctor" && (
+            <DoctorProfileContent doctorId={id} isOwner={isOwner} />
           )}
-          {isOwner && (
-            <button
-              className={styles.prescriptionsButton}
-              onClick={() => navigate("/appointments")}
-            >
-              Мої записи
-            </button>
+          {role === "patient" && (
+            <PatientProfileContent patientId={id} isOwner={isOwner} />
           )}
-          <LogoutButton onLogout={handleLogout} />
+
+          {isOwner && <LogoutButton onLogout={handleLogout} />}
         </>
       )}
     </div>
