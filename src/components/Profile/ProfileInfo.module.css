@@ -1,52 +1,261 @@
-.pencilIcon {
-  width: 18px;
-  height: 18px;
-  margin-left: 8px;
-  vertical-align: middle;
+.profileContent {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  gap: 1.5rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+/* ========== Ліва колонка ========== */
+.leftColumn {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ========== Права колонка ========== */
+.rightColumn {
+  flex: 0 1 280px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ========== Блоки ========== */
+.leftBlock,
+.rightBlock {
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+}
+
+/* ==== Аватар квадратний для заголовку ==== */
+.avatarSquare {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid #ccc;
+  flex-shrink: 0;
+}
+
+/* ==== Layout заголовку ==== */
+.profileHeader {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.profileTextBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.profileName {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+}
+
+.profileEmail,
+.profilePhone {
+  font-size: 0.95rem;
+  color: #444;
+  word-break: break-word;
+}
+
+/* ========== Старі поля рядків ========== */
+.editableRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.inputField {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+}
+
+.valueText {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ========== Кнопка редагування ========== */
+.editButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
+}
+
+.blockEditIcon {
+  width: 16px;
+  height: 16px;
   opacity: 0.7;
   transition: opacity 0.2s ease;
 }
 
-.pencilIcon:hover {
+.blockEditIcon:hover {
   opacity: 1;
 }
 
-.inputField {
-  padding: 0.8rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+/* ========== Кнопки дій ========== */
+.inlineButtonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: stretch;
+  width: 100%;
   box-sizing: border-box;
-  font-size: 1rem;
-  margin-right: 6px;
-  width: 250px;
+  margin-top: 0.5rem;
 }
 
+.inlineButtonGroup a {
+  flex: 1 1 48%;
+  text-align: center;
+  white-space: normal;
+  word-break: break-word;
+  padding: 0.75rem 1rem;
+}
+
+/* ========== Системні кнопки ========== */
 .saveButton,
 .cancelButton {
-  padding: 0.8rem;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.75rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: 0.2s ease;
 }
 
 .saveButton {
-  background-color: #646cff;
+  background-color: #0066ff;
   color: white;
-  margin-right: 6px;
 }
 
 .saveButton:hover {
-  background-color: #535bf2;
+  background-color: #004ecc;
 }
 
 .cancelButton {
-  background-color: #f44336;
+  background-color: #e53935;
   color: white;
 }
 
 .cancelButton:hover {
-  background-color: #d32f2f;
+  background-color: #c62828;
+}
+
+/* ========== Масиви ========== */
+.arrayFieldList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.arrayFieldList li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+}
+
+/* ======= Адаптив під мобільні ======= */
+@media (max-width: 768px) {
+  .profileContent {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .profileHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .leftColumn,
+  .rightColumn {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .inlineButtonGroup {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .inlineButtonGroup a {
+    flex: 1 1 100%;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    padding: 0.75rem 1rem;
+  }
+
+  .leftBlock,
+  .rightBlock {
+    padding: 1rem;
+  }
+
+  .avatar {
+    margin: 0 auto 1rem auto;
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+  }
+
+  .profileName {
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .profileEmail,
+  .profilePhone {
+    font-size: 0.95rem;
+    text-align: center;
+  }
+
+  .editButton {
+    top: 10px;
+    right: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .leftBlock,
+  .rightBlock {
+    padding: 0.75rem 0.75rem;
+  }
+
+  .inlineButtonGroup {
+    gap: 0.5rem;
+  }
+
+  .inlineButtonGroup a {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+  }
 }
