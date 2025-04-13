@@ -3,14 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getUserProfile } from "../../api/profileApi";
 import Loader from "../../components/Loader/Loader";
 import LogoutButton from "../../components/LogoutButton/LogoutButton";
-import AvatarUploader from "../../components/AvatarUploader/AvatarUploader";
 import DoctorProfileContent from "../../components/Profile/DoctorProfileContent";
-import PatientProfileContent from "../../components/Profile/PatientProfileContent";
 import DoctorProfileInfo from "../../components/Profile/DoctorProfileInfo";
+import PatientProfileInfo from "../../components/Profile/PatientProfileInfo";
 import { getAvatarUrl } from "../../api/avatarApi";
 import EditProfileModal from "../../components/Profile/EditProfileModal/EditProfileModal";
 import styles from "./ProfilePage.module.css";
 import pencilIcon from "../../assets/pencil.svg";
+import OutlineButton from "../../components/Buttons/OutlineButton";
 
 function ProfilePage() {
   const { role, id } = useParams();
@@ -153,16 +153,16 @@ function ProfilePage() {
                 )}
               </div>
 
-              <div className={styles.leftBlock}>
-                <div className={styles.fieldLine}>
-                  <strong>Medical Records:</strong>{" "}
-                  {profile.medicalRecords?.length || 0} records
+              {isOwner && (
+                <div className={styles.leftBlock}>
+                  <OutlineButton to={`/profile/patient/${id}/prescriptions`}>
+                    Переглянути призначення
+                  </OutlineButton>
+                  <OutlineButton to="/appointments">
+                    Переглянути записи
+                  </OutlineButton>
                 </div>
-                <div className={styles.fieldLine}>
-                  <strong>Prescriptions:</strong>{" "}
-                  {profile.prescriptions?.length || 0} prescriptions
-                </div>
-              </div>
+              )}
             </div>
 
             <div className={styles.rightColumn}>
@@ -273,9 +273,6 @@ function ProfilePage() {
 
           {role === "doctor" && (
             <DoctorProfileContent doctorId={id} isOwner={isOwner} />
-          )}
-          {role === "patient" && (
-            <PatientProfileContent patientId={id} isOwner={isOwner} />
           )}
 
           {isOwner && <LogoutButton onLogout={handleLogout} />}

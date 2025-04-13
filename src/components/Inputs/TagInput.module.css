@@ -1,0 +1,41 @@
+.tagInputContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.tag {
+  background: #3182ce;
+  color: white;
+  padding: 0px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0px;
+}
+
+.tag button {
+  background: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  margin: 0;
+}
+
+.tagInputContainer input {
+  border: none;
+  flex: 1;
+  min-width: 120px;
+  padding: 4px;
+  outline: none;
+}
+
+.error {
+  color: #d32f2f;
+  font-size: 13px;
+  margin-top: 4px;
+}

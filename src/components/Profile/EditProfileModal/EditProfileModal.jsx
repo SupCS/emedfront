@@ -4,6 +4,7 @@ import { updateUserProfile } from "../../../api/profileApi";
 import { toast } from "react-toastify";
 import AvatarUploader from "../../AvatarUploader/AvatarUploader";
 import { getAvatarUrl } from "../../../api/avatarApi";
+import TagInput from "../../Inputs/TagInput";
 
 const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const genders = ["male", "female", "other"];
@@ -64,6 +65,7 @@ function EditProfileModal({ isOpen, onClose, currentData, onUpdate }) {
           return (
             <div key={field} className={styles.inputGroup}>
               <label>{getFieldLabel(field)}:</label>
+
               {field === "bloodType" ? (
                 <select
                   value={value || ""}
@@ -86,6 +88,12 @@ function EditProfileModal({ isOpen, onClose, currentData, onUpdate }) {
                   <option value="female">Жіноча</option>
                   <option value="other">Інша</option>
                 </select>
+              ) : field === "allergies" || field === "chronicDiseases" ? (
+                <TagInput
+                  value={Array.isArray(value) ? value : []}
+                  onChange={(tags) => handleChange(field, tags)}
+                  placeholder="Введіть значення через кому або Enter"
+                />
               ) : (
                 <input
                   type={getInputType(field)}
