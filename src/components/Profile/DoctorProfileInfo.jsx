@@ -4,7 +4,7 @@ import briefcaseIcon from "../../assets/briefcase.svg";
 import starIcon from "../../assets/star.svg";
 import checkIcon from "../../assets/check.svg";
 import OutlineButton from "../Buttons/OutlineButton";
-import DoctorSchedule from "../DoctorSchedule";
+import DoctorSchedule from "../DoctorSchedule/DoctorSchedule";
 import RightBlock from "./RightBlock";
 
 export default function DoctorProfileInfo({ profile, isOwner, onEdit }) {

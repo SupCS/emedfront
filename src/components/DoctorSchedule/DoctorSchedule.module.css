@@ -1,0 +1,122 @@
+.scheduleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.scheduleHeader {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.scheduleGrid {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.scheduleColumn {
+  background-color: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.dateLabel {
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+}
+
+.timeSlot {
+  background-color: #e6f2f9;
+  color: #1a1a1a;
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timeSlot:hover {
+  background-color: #d0e9f5;
+}
+
+.removeButton {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.removeButton:hover {
+  color: #e53935;
+}
+
+.addSlotForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.addSlotForm label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-right: 0.25rem;
+}
+
+.addSlotForm input[type="date"],
+.addSlotForm input[type="time"] {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+
+.addSlotForm button {
+  background-color: #0066ff;
+  color: white;
+  border: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.addSlotForm button:hover {
+  background-color: #004ecc;
+}
+
+.emptyMessage {
+  font-style: italic;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+  .scheduleGrid {
+    flex-direction: column;
+  }
+
+  .scheduleColumn {
+    min-width: 100%;
+  }
+}

@@ -1,4 +1,4 @@
-import DoctorSchedule from "../DoctorSchedule";
+import DoctorSchedule from "../DoctorSchedule/DoctorSchedule";
 
 function DoctorProfileContent({ doctorId }) {
   return <DoctorSchedule doctorId={doctorId} />;
