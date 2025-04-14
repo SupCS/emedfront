@@ -1,6 +1,13 @@
+// 📄 PatientProfileInfo.jsx
 import styles from "./ProfileInfo.module.css";
 import pencilIcon from "../../assets/pencil.svg";
+import calendarBirthdayIcon from "../../assets/calendarBirthday.svg";
+import rulerIcon from "../../assets/ruler.svg";
+import scaleIcon from "../../assets/scale.svg";
+import bloodtypeIcon from "../../assets/bloodtype.svg";
+import genderIcon from "../../assets/gender.svg";
 import OutlineButton from "../Buttons/OutlineButton";
+import RightBlock from "./RightBlock";
 
 export default function PatientProfileInfo({ profile, isOwner, onEdit }) {
   const formatDate = (isoDate) => {
@@ -33,6 +40,7 @@ export default function PatientProfileInfo({ profile, isOwner, onEdit }) {
   return (
     <div className={styles.profileContent}>
       <div className={styles.leftColumn}>
+        {/* Заголовок */}
         <div className={styles.leftBlock}>
           <div className={styles.profileHeader}>
             <img
@@ -40,7 +48,6 @@ export default function PatientProfileInfo({ profile, isOwner, onEdit }) {
               alt="Аватар"
               className={styles.avatarSquare}
             />
-
             <div className={styles.profileTextBlock}>
               <div className={styles.profileName}>{profile.name}</div>
               <div className={styles.profileEmail}>{profile.email}</div>
@@ -62,6 +69,7 @@ export default function PatientProfileInfo({ profile, isOwner, onEdit }) {
           )}
         </div>
 
+        {/* Медична інформація */}
         <div className={styles.leftBlock}>
           <div className={styles.fieldLine}>
             <strong>Алергії:</strong>{" "}
@@ -85,6 +93,7 @@ export default function PatientProfileInfo({ profile, isOwner, onEdit }) {
           )}
         </div>
 
+        {/* Кнопки дій */}
         {isOwner && (
           <div className={styles.leftBlock}>
             <div className={styles.inlineButtonGroup}>
@@ -101,101 +110,54 @@ export default function PatientProfileInfo({ profile, isOwner, onEdit }) {
         )}
       </div>
 
+      {/* Права колонка */}
       <div className={styles.rightColumn}>
-        <div className={styles.rightBlock}>
-          <div className={styles.fieldLine}>
-            <strong>Дата народження:</strong>{" "}
-            {profile.birthDate
+        <RightBlock
+          icon={calendarBirthdayIcon}
+          label="Дата народження"
+          value={
+            profile.birthDate
               ? `${formatDate(profile.birthDate)} (${calculateAge(
                   profile.birthDate
                 )})`
-              : "-"}
-          </div>
-          {isOwner && (
-            <button
-              className={styles.editButton}
-              onClick={() => onEdit(["birthDate"])}
-            >
-              <img
-                src={pencilIcon}
-                className={styles.blockEditIcon}
-                alt="edit"
-              />
-            </button>
-          )}
-        </div>
-
-        <div className={styles.rightBlock}>
-          <div className={styles.fieldLine}>
-            <strong>Зріст (см):</strong> {profile.height || "-"}
-          </div>
-          {isOwner && (
-            <button
-              className={styles.editButton}
-              onClick={() => onEdit(["height"])}
-            >
-              <img
-                src={pencilIcon}
-                className={styles.blockEditIcon}
-                alt="edit"
-              />
-            </button>
-          )}
-        </div>
-
-        <div className={styles.rightBlock}>
-          <div className={styles.fieldLine}>
-            <strong>Вага (кг):</strong> {profile.weight || "-"}
-          </div>
-          {isOwner && (
-            <button
-              className={styles.editButton}
-              onClick={() => onEdit(["weight"])}
-            >
-              <img
-                src={pencilIcon}
-                className={styles.blockEditIcon}
-                alt="edit"
-              />
-            </button>
-          )}
-        </div>
-
-        <div className={styles.rightBlock}>
-          <div className={styles.fieldLine}>
-            <strong>Група крові:</strong> {profile.bloodType || "-"}
-          </div>
-          {isOwner && (
-            <button
-              className={styles.editButton}
-              onClick={() => onEdit(["bloodType"])}
-            >
-              <img
-                src={pencilIcon}
-                className={styles.blockEditIcon}
-                alt="edit"
-              />
-            </button>
-          )}
-        </div>
-
-        <div className={styles.rightBlock}>
-          <div className={styles.fieldLine}>
-            <strong>Стать:</strong> {getGenderLabel(profile.gender) || "-"}
-          </div>
-          {isOwner && (
-            <button
-              className={styles.editButton}
-              onClick={() => onEdit(["gender"])}
-            >
-              <img
-                src={pencilIcon}
-                className={styles.blockEditIcon}
-                alt="edit"
-              />
-            </button>
-          )}
-        </div>
+              : "-"
+          }
+          editable
+          onEditClick={() => onEdit(["birthDate"])}
+          isOwner={isOwner}
+        />
+        <RightBlock
+          icon={rulerIcon}
+          label="Зріст (см)"
+          value={profile.height}
+          editable
+          onEditClick={() => onEdit(["height"])}
+          isOwner={isOwner}
+        />
+        <RightBlock
+          icon={scaleIcon}
+          label="Вага (кг)"
+          value={profile.weight}
+          editable
+          onEditClick={() => onEdit(["weight"])}
+          isOwner={isOwner}
+        />
+        <RightBlock
+          icon={bloodtypeIcon}
+          label="Група крові"
+          value={profile.bloodType}
+          editable
+          onEditClick={() => onEdit(["bloodType"])}
+          isOwner={isOwner}
+        />
+        <RightBlock
+          icon={genderIcon}
+          label="Стать"
+          value={getGenderLabel(profile.gender)}
+          editable
+          onEditClick={() => onEdit(["gender"])}
+          isOwner={isOwner}
+        />
       </div>
     </div>
   );

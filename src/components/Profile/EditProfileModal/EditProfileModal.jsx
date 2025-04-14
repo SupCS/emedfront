@@ -130,6 +130,7 @@ function getFieldLabel(field) {
     gender: "Стать",
     allergies: "Алергії",
     chronicDiseases: "Хронічні діагнози",
+    bio: "Про себе",
   };
   return labels[field] || field;
 }

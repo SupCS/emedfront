@@ -1,105 +1,112 @@
-import { useState } from "react";
-import { toast } from "react-toastify";
-import { updateUserProfile } from "../../api/profileApi";
-import pencilIcon from "../../assets/pencil.svg";
 import styles from "./ProfileInfo.module.css";
+import pencilIcon from "../../assets/pencil.svg";
+import briefcaseIcon from "../../assets/briefcase.svg";
+import starIcon from "../../assets/star.svg";
+import checkIcon from "../../assets/check.svg";
+import OutlineButton from "../Buttons/OutlineButton";
+import DoctorSchedule from "../DoctorSchedule";
+import RightBlock from "./RightBlock";
 
-function DoctorProfileInfo({ profile }) {
-  const [isEditing, setIsEditing] = useState({});
-  const [formData, setFormData] = useState({
-    name: profile.name,
-    bio: profile.bio || "",
-  });
-
-  const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSave = async (field) => {
-    const trimmed = formData[field]?.trim();
-    if (!trimmed) return toast.error("Поле не може бути порожнім");
-
-    try {
-      await updateUserProfile({ [field]: trimmed });
-      setIsEditing((prev) => ({ ...prev, [field]: false }));
-      toast.success("Дані оновлено успішно");
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Помилка оновлення профілю");
-    }
-  };
-
-  const handleCancel = (field) => {
-    setFormData((prev) => ({ ...prev, [field]: profile[field] || "" }));
-    setIsEditing((prev) => ({ ...prev, [field]: false }));
-  };
-
-  const renderField = (label, field, editable) => (
-    <p className={styles.editableRow}>
-      <strong>{label}:</strong>{" "}
-      {isEditing[field] ? (
-        <>
-          <input
-            value={formData[field] || ""}
-            onChange={(e) => handleChange(field, e.target.value)}
-            className={styles.inputField}
-          />
-          <button
-            onClick={() => handleSave(field)}
-            className={styles.saveButton}
-          >
-            Зберегти
-          </button>
-          <button
-            onClick={() => handleCancel(field)}
-            className={styles.cancelButton}
-          >
-            Відміна
-          </button>
-        </>
-      ) : (
-        <span className={styles.valueText}>
-          {formData[field] || "-"}
-          {editable && (
-            <img
-              src={pencilIcon}
-              alt="Редагувати"
-              className={styles.pencilIcon}
-              onClick={() =>
-                setIsEditing((prev) => ({ ...prev, [field]: true }))
-              }
-            />
-          )}
-        </span>
-      )}
-    </p>
+export default function DoctorProfileInfo({ profile, isOwner, onEdit }) {
+  const renderFieldLine = (label, value) => (
+    <div className={styles.fieldLine}>
+      <strong>{label}:</strong> {value || "-"}
+    </div>
   );
 
+  function getYearsLabel(n) {
+    if (typeof n !== "number") return "-";
+    const lastDigit = n % 10;
+    const lastTwoDigits = n % 100;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return `${n} років`;
+    if (lastDigit === 1) return `${n} рік`;
+    if (lastDigit >= 2 && lastDigit <= 4) return `${n} роки`;
+    return `${n} років`;
+  }
+
+  function getRatingLabel(value) {
+    return value === null || value === undefined ? "Немає оцінок" : value;
+  }
+
   return (
-    <div className={styles.profileContainer}>
-      <h2 className={styles.profileTitle}>Profile</h2>
-      <div className={styles.profileDetails}>
-        <p>
-          <strong>Name:</strong> {formData.name}
-        </p>
-        <p>
-          <strong>Email:</strong> {profile.email}
-        </p>
-        <p>
-          <strong>Specialization:</strong> {profile.specialization}
-        </p>
-        <p>
-          <strong>Experience:</strong> {profile.experience} years
-        </p>
-        <p>
-          <strong>Rating:</strong> {profile.rating}
-        </p>
-        {renderField("Bio", "bio", true)}
-        <p>
-          <strong>Awards:</strong> {profile.awards?.join(", ") || "No awards"}
-        </p>
+    <div className={styles.profileContent}>
+      <div className={styles.leftColumn}>
+        {/* Header */}
+        <div className={styles.leftBlock}>
+          <div className={styles.profileHeader}>
+            <img
+              src={profile.avatar}
+              alt="Аватар"
+              className={styles.avatarSquare}
+            />
+            <div className={styles.profileTextBlock}>
+              <div className={styles.profileName}>{profile.name}</div>
+              <div className={styles.profileEmail}>{profile.email}</div>
+              <div className={styles.profilePhone}>{profile.phone}</div>
+            </div>
+          </div>
+
+          {isOwner && (
+            <button
+              className={styles.editButton}
+              onClick={() => onEdit(["avatar", "name", "phone"])}
+            >
+              <img
+                src={pencilIcon}
+                className={styles.blockEditIcon}
+                alt="edit"
+              />
+            </button>
+          )}
+        </div>
+
+        {/* Additional Info */}
+        <div className={styles.leftBlock}>
+          {renderFieldLine("Спеціалізація", profile.specialization)}
+          {renderFieldLine("Про себе", profile.bio)}
+          {renderFieldLine(
+            "Нагороди",
+            profile.awards?.join(", ") || "Відсутні"
+          )}
+
+          {isOwner && (
+            <button
+              className={styles.editButton}
+              onClick={() => onEdit(["bio"])}
+            >
+              <img
+                src={pencilIcon}
+                className={styles.blockEditIcon}
+                alt="edit"
+              />
+            </button>
+          )}
+        </div>
+
+        {/* Schedule */}
+        <div className={styles.leftBlock}>
+          <DoctorSchedule doctorId={profile.id} />
+        </div>
+      </div>
+
+      <div className={styles.rightColumn}>
+        <RightBlock
+          icon={briefcaseIcon}
+          label="Стаж"
+          value={getYearsLabel(profile.experience)}
+        />
+        <RightBlock
+          icon={starIcon}
+          label="Рейтинг"
+          value={getRatingLabel(profile.rating)}
+        />
+        <RightBlock
+          icon={checkIcon}
+          label="Прийомів завершено"
+          value={profile.passedAppointmentsCount || "—"}
+        />
       </div>
     </div>
   );
 }
-
-export default DoctorProfileInfo;

@@ -68,8 +68,12 @@ function ProfilePage() {
         <Loader />
       ) : (
         <>
-          {role === "doctor" && (
-            <DoctorProfileContent doctorId={id} isOwner={isOwner} />
+          {role === "doctor" && profile && (
+            <DoctorProfileInfo
+              profile={{ ...profile, avatar }}
+              isOwner={isOwner}
+              onEdit={openModalForFields}
+            />
           )}
 
           {role === "patient" && profile && (

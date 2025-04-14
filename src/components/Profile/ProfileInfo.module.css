@@ -25,8 +25,7 @@
 }
 
 /* ========== Блоки ========== */
-.leftBlock,
-.rightBlock {
+.leftBlock {
   background: white;
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
@@ -35,6 +34,53 @@
   flex-direction: column;
   gap: 0.75rem;
   position: relative;
+}
+
+.rightBlock {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  position: relative;
+  align-items: center;
+  justify-content: center;
+}
+
+.rightBlockInner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.blockLabel {
+  color: #6b7280;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.blockValue {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.iconBlock {
+  width: 50px;
+  height: 50px;
+  background-color: #f0f4ff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.iconImage {
+  width: 20px;
+  height: 20px;
 }
 
 /* ==== Аватар квадратний для заголовку ==== */
@@ -117,6 +163,38 @@
 }
 
 .blockEditIcon:hover {
+  opacity: 1;
+}
+
+.blockLabelWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  position: relative;
+}
+
+.inlineEditButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.rightBlock:hover .inlineEditButton {
+  opacity: 1;
+}
+
+.inlineEditIcon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+}
+
+.inlineEditIcon:hover {
   opacity: 1;
 }
 
