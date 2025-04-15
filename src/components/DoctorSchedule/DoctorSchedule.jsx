@@ -18,6 +18,7 @@ import {
 function DoctorSchedule({ doctorId }) {
   const [schedule, setSchedule] = useState({});
   const [visibleStartDate, setVisibleStartDate] = useState(startOfToday());
+  const [visibleDaysCount, setVisibleDaysCount] = useState(3);
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -38,6 +39,18 @@ function DoctorSchedule({ doctorId }) {
   useEffect(() => {
     fetchSchedule();
   }, [fetchSchedule]);
+
+  useEffect(() => {
+    const updateVisibleDays = () => {
+      const width = window.innerWidth;
+      if (width >= 1024) setVisibleDaysCount(4);
+      else if (width >= 768) setVisibleDaysCount(3);
+      else setVisibleDaysCount(1);
+    };
+    updateVisibleDays();
+    window.addEventListener("resize", updateVisibleDays);
+    return () => window.removeEventListener("resize", updateVisibleDays);
+  }, []);
 
   const handleAddSlot = async () => {
     if (!date || !startTime || !endTime) {
@@ -64,18 +77,18 @@ function DoctorSchedule({ doctorId }) {
   };
 
   const getFormattedDate = (date) => format(date, "yyyy-MM-dd");
-  const getVisibleDates = () => [
-    visibleStartDate,
-    addDays(visibleStartDate, 1),
-    addDays(visibleStartDate, 2),
-  ];
+  const getVisibleDates = () => {
+    return Array.from({ length: visibleDaysCount }, (_, i) =>
+      addDays(visibleStartDate, i)
+    );
+  };
 
   const handleNext = () => {
-    setVisibleStartDate((prev) => addDays(prev, 3));
+    setVisibleStartDate((prev) => addDays(prev, visibleDaysCount));
   };
 
   const handlePrev = () => {
-    const prevDate = subDays(visibleStartDate, 3);
+    const prevDate = subDays(visibleStartDate, visibleDaysCount);
     const today = startOfToday();
     if (!isBefore(prevDate, today)) {
       setVisibleStartDate(prevDate);
@@ -86,7 +99,8 @@ function DoctorSchedule({ doctorId }) {
 
   return (
     <div className={styles.scheduleContainer}>
-      <div className={styles.navHeader}>
+      <h3 className={styles.scheduleHeader}>Розклад лікаря</h3>
+      <div className={styles.navControls}>
         <button
           onClick={handlePrev}
           className={styles.navButton}
@@ -94,7 +108,6 @@ function DoctorSchedule({ doctorId }) {
         >
           ←
         </button>
-        <h3 className={styles.scheduleHeader}>Розклад лікаря</h3>
         <button onClick={handleNext} className={styles.navButton}>
           →
         </button>

@@ -1,13 +1,38 @@
 .scheduleContainer {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .scheduleHeader {
   font-size: 1.1rem;
   font-weight: 600;
   color: #1a1a1a;
+  margin: 0;
+}
+
+.navControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #1a1a1a;
+  transition: color 0.2s ease;
+}
+
+.navButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.navButton:hover:not(:disabled) {
+  color: #0066ff;
 }
 
 .scheduleGrid {
@@ -15,21 +40,57 @@
   gap: 1.5rem;
   overflow-x: auto;
   padding-bottom: 0.5rem;
+  justify-content: center;
 }
 
 .scheduleColumn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   background-color: white;
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  min-width: 140px;
+  min-width: 200px;
   flex-shrink: 0;
+  min-height: 250px;
+  max-height: 330px;
+  overflow-y: overlay;
+
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent;
+
+  transition: all 0.3s ease;
+}
+
+.scheduleColumn:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+/* Chrome (webkit) */
+.scheduleColumn::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scheduleColumn::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scheduleColumn::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  transition: background-color 0.3s ease;
+  border-radius: 4px;
+}
+
+.scheduleColumn:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .dateLabel {
   font-weight: 600;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   font-size: 0.95rem;
   color: #1a1a1a;
 }
@@ -38,15 +99,13 @@
   background-color: #e6f2f9;
   color: #1a1a1a;
   border-radius: 8px;
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.75rem;
   font-size: 0.9rem;
-  text-align: center;
-  cursor: pointer;
-  position: relative;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  position: relative;
+  min-width: 120px;
 }
 
 .timeSlot:hover {
@@ -54,14 +113,15 @@
 }
 
 .removeButton {
-  position: absolute;
-  top: 2px;
-  right: 4px;
   background: none;
   border: none;
   color: #888;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
 }
 
 .removeButton:hover {
