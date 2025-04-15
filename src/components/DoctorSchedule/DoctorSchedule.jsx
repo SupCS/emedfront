@@ -65,7 +65,7 @@ function DoctorSchedule({ doctorId }) {
       toast.success("Тайм-слот успішно додано!");
       fetchSchedule();
     } catch (err) {
-      toast.error("Не вдалося додати тайм-слот.");
+      toast.error("Не вдалося додати тайм-слот." + err.message);
     }
   };
 

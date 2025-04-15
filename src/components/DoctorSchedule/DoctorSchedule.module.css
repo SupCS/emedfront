@@ -146,7 +146,7 @@
   padding: 0.6rem 1rem;
   border-radius: 6px;
   font-size: 0.95rem;
-  margin: 1rem auto 0 auto;
+  margin: 0 auto 0 auto;
   display: block;
   cursor: pointer;
   transition: background 0.2s ease;
