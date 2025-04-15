@@ -14,6 +14,7 @@ import {
   isSameDay,
   startOfToday,
 } from "date-fns";
+import { uk } from "date-fns/locale";
 
 function DoctorSchedule({ doctorId }) {
   const [schedule, setSchedule] = useState({});
@@ -88,19 +89,21 @@ function DoctorSchedule({ doctorId }) {
   };
 
   const handlePrev = () => {
-    const prevDate = subDays(visibleStartDate, visibleDaysCount);
     const today = startOfToday();
-    if (!isBefore(prevDate, today)) {
+    const prevDate = subDays(visibleStartDate, visibleDaysCount);
+
+    if (isBefore(prevDate, today)) {
+      setVisibleStartDate(today);
+    } else {
       setVisibleStartDate(prevDate);
     }
   };
-
   const isAtToday = isSameDay(visibleStartDate, startOfToday());
+  const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   return (
     <div className={styles.scheduleContainer}>
-      <h3 className={styles.scheduleHeader}>Розклад лікаря</h3>
-      <div className={styles.navControls}>
+      <div className={styles.navRow}>
         <button
           onClick={handlePrev}
           className={styles.navButton}
@@ -108,6 +111,9 @@ function DoctorSchedule({ doctorId }) {
         >
           ←
         </button>
+
+        <h3 className={styles.scheduleHeader}>Розклад лікаря</h3>
+
         <button onClick={handleNext} className={styles.navButton}>
           →
         </button>
@@ -121,7 +127,7 @@ function DoctorSchedule({ doctorId }) {
           return (
             <div className={styles.scheduleColumn} key={index}>
               <div className={styles.dateLabel}>
-                {format(dateObj, "EEEE, MMM d")}
+                {capitalize(format(dateObj, "EEEE, d MMM", { locale: uk }))}
               </div>
               {slots.length === 0 ? (
                 <div className={styles.emptyMessage}>Немає слотів</div>
