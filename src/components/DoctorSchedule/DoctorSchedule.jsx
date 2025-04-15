@@ -15,6 +15,7 @@ import {
   startOfToday,
 } from "date-fns";
 import { uk } from "date-fns/locale";
+import AddSlotForm from "./AddSlotForm";
 
 function DoctorSchedule({ doctorId }) {
   const [schedule, setSchedule] = useState({});
@@ -23,6 +24,7 @@ function DoctorSchedule({ doctorId }) {
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchSchedule = useCallback(async () => {
     try {
@@ -132,47 +134,58 @@ function DoctorSchedule({ doctorId }) {
               {slots.length === 0 ? (
                 <div className={styles.emptyMessage}>Немає слотів</div>
               ) : (
-                slots.map((slot, i) => (
-                  <div key={i} className={styles.timeSlot}>
-                    <span>
-                      {slot.startTime} - {slot.endTime}
-                    </span>
-                    <button
-                      className={styles.removeButton}
-                      onClick={() =>
-                        handleRemoveSlot(dateStr, slot.startTime, slot.endTime)
-                      }
+                [...slots]
+                  .sort((a, b) => a.startTime.localeCompare(b.startTime))
+                  .map((slot, i) => (
+                    <div
+                      key={`${slot.startTime}-${slot.endTime}`}
+                      className={styles.timeSlot}
                     >
-                      ✕
-                    </button>
-                  </div>
-                ))
+                      <span>
+                        {slot.startTime} - {slot.endTime}
+                      </span>
+                      <button
+                        className={styles.removeButton}
+                        onClick={() =>
+                          handleRemoveSlot(
+                            dateStr,
+                            slot.startTime,
+                            slot.endTime
+                          )
+                        }
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))
               )}
             </div>
           );
         })}
       </div>
 
-      <h4 className={styles.formTitle}>Додати тайм-слот</h4>
-      <div className={styles.addSlotForm}>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
+      <button
+        className={styles.addSlotButton}
+        onClick={() => setIsModalOpen(true)}
+      >
+        + Додати тайм-слот
+      </button>
+
+      {isModalOpen && (
+        <AddSlotForm
+          date={date}
+          startTime={startTime}
+          endTime={endTime}
+          setDate={setDate}
+          setStartTime={setStartTime}
+          setEndTime={setEndTime}
+          onAdd={() => {
+            handleAddSlot();
+            setIsModalOpen(false);
+          }}
+          onClose={() => setIsModalOpen(false)}
         />
-        <input
-          type="time"
-          value={startTime}
-          onChange={(e) => setStartTime(e.target.value)}
-        />
-        <input
-          type="time"
-          value={endTime}
-          onChange={(e) => setEndTime(e.target.value)}
-        />
-        <button onClick={handleAddSlot}>Додати</button>
-        <button onClick={fetchSchedule}>Оновити</button>
-      </div>
+      )}
     </div>
   );
 }
