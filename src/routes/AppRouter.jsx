@@ -30,13 +30,14 @@ const Layout = ({ children }) => {
     location.pathname === "/register" ||
     location.pathname === "/";
 
+  const isChatPage = location.pathname.startsWith("/chat");
   return (
     <div className={styles.container}>
       {!isPublicRoute && <Sidebar />}
       <div className={isPublicRoute ? styles.fullContent : styles.content}>
         {children}
         {/* AI-помічник тільки на захищених сторінках */}
-        {!isPublicRoute && <AIAssistantWidget />}
+        {!isPublicRoute && !isChatPage && <AIAssistantWidget />}
       </div>
     </div>
   );

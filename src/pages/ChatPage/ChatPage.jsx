@@ -91,6 +91,7 @@ const ChatPage = () => {
         chats={chats}
         onSelectChat={handleSelectChat}
         currentUser={currentUser}
+        selectedChatId={selectedChat?._id}
       />
       {selectedChat ? (
         <ChatWindow chat={selectedChat} currentUser={currentUser} />

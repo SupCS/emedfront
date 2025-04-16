@@ -6,21 +6,32 @@ import {
 } from "../../api/chatApi";
 import { socket, connectSocket, sendMessageSocket } from "../../api/socket";
 import { toast } from "react-toastify";
+import { getAvatarUrl } from "../../api/avatarApi";
 import styles from "./ChatWindow.module.css";
 
 const ChatWindow = ({ chat, currentUser }) => {
-  const [messages, setMessages] = useState([]); // Список повідомлень
-  const [newMessage, setNewMessage] = useState(""); // Поточне введене повідомлення
-  const messagesEndRef = useRef(null); // Референс для автоматичної прокрутки вниз
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
   const [isAppointmentActive, setIsAppointmentActive] = useState(false);
   const [callId, setCallId] = useState(null);
+  const messagesEndRef = useRef(null);
+
+  const interlocutor = chat.participants.find((p) => p._id !== currentUser.id);
+  const interlocutorIndex = chat.participants.findIndex(
+    (p) => p._id === interlocutor?._id
+  );
+  const interlocutorRole =
+    interlocutorIndex !== -1
+      ? chat.participantModel[interlocutorIndex].toLowerCase()
+      : "unknown";
+  const avatar = interlocutor?.avatar
+    ? getAvatarUrl(interlocutor.avatar)
+    : "/images/default-avatar.webp";
 
   useEffect(() => {
     if (!chat || !currentUser) return;
 
-    if (!socket.connected) {
-      connectSocket();
-    }
+    if (!socket.connected) connectSocket();
 
     const fetchMessages = async () => {
       try {
@@ -32,12 +43,9 @@ const ChatWindow = ({ chat, currentUser }) => {
       }
     };
 
-    fetchMessages();
-
     const checkAppointmentStatus = async () => {
       try {
         const res = await getCurrentAppointment(chat._id);
-        console.log(res);
         setIsAppointmentActive(res.isActive);
         setCallId(res.firestoreCallId || null);
       } catch (err) {
@@ -45,15 +53,14 @@ const ChatWindow = ({ chat, currentUser }) => {
       }
     };
 
+    fetchMessages();
     checkAppointmentStatus();
 
     return () => {
       socket.off("receiveMessage");
-      socket.off("messageSent");
     };
   }, [chat, currentUser]);
 
-  // Функція для отримання нових повідомлень через WebSocket
   const handleReceiveMessage = useCallback(
     async (message) => {
       if (String(message.chat) !== String(chat._id)) {
@@ -64,11 +71,10 @@ const ChatWindow = ({ chat, currentUser }) => {
       }
 
       setMessages((prev) => {
-        // Видаляємо тимчасове повідомлення, якщо прийшло справжнє
-        const filteredMessages = prev.filter(
+        const filtered = prev.filter(
           (msg) => !(msg._tempId && msg.content === message.content)
         );
-        return [...filteredMessages, message];
+        return [...filtered, message];
       });
 
       await markChatAsRead(chat._id, currentUser.id);
@@ -83,7 +89,6 @@ const ChatWindow = ({ chat, currentUser }) => {
     };
   }, [handleReceiveMessage]);
 
-  // Прокрутка вниз після отримання нового повідомлення
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -97,13 +102,11 @@ const ChatWindow = ({ chat, currentUser }) => {
     };
 
     socket.on("appointmentStart", handleAppointmentStart);
-
     return () => {
       socket.off("appointmentStart", handleAppointmentStart);
     };
   }, [chat]);
 
-  // Функція відправлення повідомлення
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
 
@@ -112,39 +115,46 @@ const ChatWindow = ({ chat, currentUser }) => {
       return;
     }
 
-    try {
-      const recipient = chat.participants.find((p) => p._id !== currentUser.id);
-      if (!recipient) {
-        toast.error("Не вдається визначити отримувача.");
-        return;
-      }
-
-      const tempMessage = {
-        _id: Math.random().toString(36).substr(2, 9), // Генеруємо тимчасовий ID
-        _tempId: true, // Позначка, що це тимчасове повідомлення
-        chat: chat._id,
-        sender: currentUser.id,
-        senderName: currentUser.name,
-        content: newMessage,
-        createdAt: new Date().toISOString(),
-      };
-
-      setMessages((prev) => [...prev, tempMessage]); // Додаємо тимчасове повідомлення у список
-      sendMessageSocket(chat._id, newMessage, recipient._id);
-      setNewMessage(""); // Очищуємо поле вводу
-    } catch (err) {
-      toast.error(`Помилка відправлення: ${err.message}`);
+    const recipient = chat.participants.find((p) => p._id !== currentUser.id);
+    if (!recipient) {
+      toast.error("Не вдається визначити отримувача.");
+      return;
     }
+
+    const tempMessage = {
+      _id: Math.random().toString(36).substr(2, 9),
+      _tempId: true,
+      chat: chat._id,
+      sender: currentUser.id,
+      senderName: currentUser.name,
+      content: newMessage,
+      createdAt: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, tempMessage]);
+    sendMessageSocket(chat._id, newMessage, recipient._id);
+    setNewMessage("");
   };
 
   return (
     <div className={styles.chatWindow}>
       <div className={styles.chatHeader}>
-        <h3 className={styles.chatTitle}>
-          Чат з{" "}
-          {chat.participants.find((p) => p._id !== currentUser.id)?.name ||
-            "Невідомий"}
-        </h3>
+        <div className={styles.chatUserInfo}>
+          <img src={avatar} alt="Avatar" className={styles.chatAvatar} />
+          <h3
+            className={styles.chatTitle}
+            onClick={() =>
+              interlocutor &&
+              window.open(
+                `/profile/${interlocutorRole}/${interlocutor._id}`,
+                "_self"
+              )
+            }
+            style={{ cursor: "pointer" }}
+          >
+            {interlocutor?.name || "Невідомий"}
+          </h3>
+        </div>
 
         {isAppointmentActive && callId && (
           <div className={styles.videoButtonWrapper}>
@@ -161,19 +171,34 @@ const ChatWindow = ({ chat, currentUser }) => {
       </div>
 
       <div className={styles.messages}>
-        {messages.map((msg) => (
-          <div key={msg._id} className={styles.message}>
-            <strong>{msg.senderName || "Анонім"}:</strong> {msg.content}
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
+        <div className={styles.imessage}>
+          {messages.map((msg) => {
+            const isMe = msg.sender === currentUser.id;
+            return (
+              <p
+                key={msg._id}
+                className={isMe ? styles.fromMe : styles.fromThem}
+              >
+                {msg.content}
+              </p>
+            );
+          })}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
+
       <div className={styles.inputArea}>
         <input
           type="text"
           placeholder="Введіть повідомлення..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSendMessage();
+            }
+          }}
         />
         <button onClick={handleSendMessage}>Відправити</button>
       </div>
