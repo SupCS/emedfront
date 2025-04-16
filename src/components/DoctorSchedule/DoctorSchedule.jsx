@@ -5,6 +5,7 @@ import {
   addDoctorSlot,
   removeDoctorSlot,
 } from "../../api/scheduleApi";
+import { createAppointment } from "../../api/appointmentApi";
 import { toast } from "react-toastify";
 import {
   format,
@@ -16,8 +17,9 @@ import {
 } from "date-fns";
 import { uk } from "date-fns/locale";
 import AddSlotForm from "./AddSlotForm";
+import ConfirmBookingModal from "../ConfirmBookingModal/ConfirmBookingModal";
 
-function DoctorSchedule({ doctorId }) {
+function DoctorSchedule({ doctorId, isOwner, doctorName }) {
   const [schedule, setSchedule] = useState({});
   const [visibleStartDate, setVisibleStartDate] = useState(startOfToday());
   const [visibleDaysCount, setVisibleDaysCount] = useState(3);
@@ -25,6 +27,7 @@ function DoctorSchedule({ doctorId }) {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bookingData, setBookingData] = useState(null);
 
   const fetchSchedule = useCallback(async () => {
     try {
@@ -79,6 +82,22 @@ function DoctorSchedule({ doctorId }) {
     }
   };
 
+  const handleConfirmBooking = async () => {
+    try {
+      await createAppointment(
+        doctorId,
+        bookingData.date,
+        bookingData.startTime,
+        bookingData.endTime
+      );
+      toast.success("Запис підтверджено!");
+      setBookingData(null);
+      fetchSchedule();
+    } catch (err) {
+      toast.error("Не вдалося записатись на прийом.");
+    }
+  };
+
   const getFormattedDate = (date) => format(date, "yyyy-MM-dd");
   const getVisibleDates = () => {
     return Array.from({ length: visibleDaysCount }, (_, i) =>
@@ -93,13 +112,13 @@ function DoctorSchedule({ doctorId }) {
   const handlePrev = () => {
     const today = startOfToday();
     const prevDate = subDays(visibleStartDate, visibleDaysCount);
-
     if (isBefore(prevDate, today)) {
       setVisibleStartDate(today);
     } else {
       setVisibleStartDate(prevDate);
     }
   };
+
   const isAtToday = isSameDay(visibleStartDate, startOfToday());
   const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -136,26 +155,57 @@ function DoctorSchedule({ doctorId }) {
               ) : (
                 [...slots]
                   .sort((a, b) => a.startTime.localeCompare(b.startTime))
-                  .map((slot, i) => (
+                  .map((slot) => (
                     <div
                       key={`${slot.startTime}-${slot.endTime}`}
                       className={styles.timeSlot}
+                      onClick={
+                        !isOwner
+                          ? () =>
+                              setBookingData({
+                                date: dateStr,
+                                startTime: slot.startTime,
+                                endTime: slot.endTime,
+                              })
+                          : undefined
+                      }
+                      style={{
+                        cursor: isOwner ? "default" : "pointer",
+                      }}
                     >
                       <span>
                         {slot.startTime} - {slot.endTime}
                       </span>
-                      <button
-                        className={styles.removeButton}
-                        onClick={() =>
-                          handleRemoveSlot(
-                            dateStr,
-                            slot.startTime,
-                            slot.endTime
-                          )
-                        }
-                      >
-                        ✕
-                      </button>
+
+                      {isOwner && (
+                        <button
+                          className={styles.removeButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveSlot(
+                              dateStr,
+                              slot.startTime,
+                              slot.endTime
+                            );
+                          }}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className={styles.removeIcon}
+                          >
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   ))
               )}
@@ -164,12 +214,14 @@ function DoctorSchedule({ doctorId }) {
         })}
       </div>
 
-      <button
-        className={styles.addSlotButton}
-        onClick={() => setIsModalOpen(true)}
-      >
-        + Додати тайм-слот
-      </button>
+      {isOwner && (
+        <button
+          className={styles.addSlotButton}
+          onClick={() => setIsModalOpen(true)}
+        >
+          + Додати тайм-слот
+        </button>
+      )}
 
       {isModalOpen && (
         <AddSlotForm
@@ -184,6 +236,17 @@ function DoctorSchedule({ doctorId }) {
             setIsModalOpen(false);
           }}
           onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {bookingData && (
+        <ConfirmBookingModal
+          doctorName={doctorName}
+          date={bookingData.date}
+          startTime={bookingData.startTime}
+          endTime={bookingData.endTime}
+          onConfirm={handleConfirmBooking}
+          onCancel={() => setBookingData(null)}
         />
       )}
     </div>

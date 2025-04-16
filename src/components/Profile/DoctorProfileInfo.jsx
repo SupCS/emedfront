@@ -86,7 +86,11 @@ export default function DoctorProfileInfo({ profile, isOwner, onEdit }) {
 
         {/* Schedule */}
         <div className={styles.leftBlock}>
-          <DoctorSchedule doctorId={profile.id} />
+          <DoctorSchedule
+            doctorId={profile.id}
+            isOwner={isOwner}
+            doctorName={profile.name}
+          />
         </div>
       </div>
 

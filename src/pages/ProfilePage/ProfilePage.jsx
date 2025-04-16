@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getUserProfile } from "../../api/profileApi";
 import Loader from "../../components/Loader/Loader";
-import LogoutButton from "../../components/LogoutButton/LogoutButton";
-import DoctorProfileContent from "../../components/Profile/DoctorProfileContent";
 import DoctorProfileInfo from "../../components/Profile/DoctorProfileInfo";
 import PatientProfileInfo from "../../components/Profile/PatientProfileInfo";
 import { getAvatarUrl } from "../../api/avatarApi";
@@ -90,8 +88,6 @@ function ProfilePage() {
             currentData={modalState.fields}
             onUpdate={handleProfileUpdate}
           />
-
-          {isOwner && <LogoutButton onLogout={handleLogout} />}
         </>
       )}
     </div>

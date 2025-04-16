@@ -65,7 +65,7 @@
   min-width: 200px;
   flex-shrink: 0;
   min-height: 250px;
-  max-height: 330px;
+  max-height: 315px;
   overflow-y: overlay;
 
   scrollbar-width: thin; /* Firefox */
@@ -113,10 +113,11 @@
   padding: 0.5rem 0.75rem;
   font-size: 0.9rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   position: relative;
   min-width: 120px;
+  gap: 0.5rem;
 }
 
 .timeSlot:hover {
@@ -126,17 +127,21 @@
 .removeButton {
   background: none;
   border: none;
-  color: #888;
-  font-size: 1.1rem;
-  cursor: pointer;
-  line-height: 1;
   padding: 0;
-  margin-left: 0.5rem;
-  flex-shrink: 0;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.2s ease;
 }
 
 .removeButton:hover {
   color: #e53935;
+}
+
+.removeIcon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  display: block;
 }
 
 .addSlotButton {
