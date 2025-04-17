@@ -119,3 +119,25 @@
   margin: 0;
   color: #1a1a1a;
 }
+
+.backButton {
+  display: none;
+}
+
+.centeredLoader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .backButton {
+    display: block;
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 1rem;
+    padding: 10px;
+    cursor: pointer;
+  }
+}

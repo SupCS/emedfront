@@ -8,12 +8,14 @@ import { socket, connectSocket, sendMessageSocket } from "../../api/socket";
 import { toast } from "react-toastify";
 import { getAvatarUrl } from "../../api/avatarApi";
 import styles from "./ChatWindow.module.css";
+import Loader from "../Loader/Loader";
 
-const ChatWindow = ({ chat, currentUser }) => {
+const ChatWindow = ({ chat, currentUser, onBack }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isAppointmentActive, setIsAppointmentActive] = useState(false);
   const [callId, setCallId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef(null);
 
   const interlocutor = chat.participants.find((p) => p._id !== currentUser.id);
@@ -30,31 +32,27 @@ const ChatWindow = ({ chat, currentUser }) => {
 
   useEffect(() => {
     if (!chat || !currentUser) return;
-
     if (!socket.connected) connectSocket();
 
-    const fetchMessages = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const data = await getChatMessages(chat._id);
-        setMessages(data);
+        const [messagesData, appointment] = await Promise.all([
+          getChatMessages(chat._id),
+          getCurrentAppointment(chat._id),
+        ]);
+        setMessages(messagesData);
+        setIsAppointmentActive(appointment.isActive);
+        setCallId(appointment.firestoreCallId || null);
         await markChatAsRead(chat._id, currentUser.id);
       } catch (err) {
-        toast.error(`Не вдалося завантажити повідомлення: ${err.message}`);
+        toast.error(`Не вдалося завантажити чат: ${err.message}`);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    const checkAppointmentStatus = async () => {
-      try {
-        const res = await getCurrentAppointment(chat._id);
-        setIsAppointmentActive(res.isActive);
-        setCallId(res.firestoreCallId || null);
-      } catch (err) {
-        console.error("Помилка при перевірці апоінтменту:", err.message);
-      }
-    };
-
-    fetchMessages();
-    checkAppointmentStatus();
+    fetchData();
 
     return () => {
       socket.off("receiveMessage");
@@ -136,10 +134,23 @@ const ChatWindow = ({ chat, currentUser }) => {
     setNewMessage("");
   };
 
+  if (isLoading) {
+    return (
+      <div className={`${styles.chatWindow} ${styles.centeredLoader}`}>
+        <Loader />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.chatWindow}>
       <div className={styles.chatHeader}>
         <div className={styles.chatUserInfo}>
+          {onBack && (
+            <button className={styles.backButton} onClick={onBack}>
+              ← Назад
+            </button>
+          )}
           <img src={avatar} alt="Avatar" className={styles.chatAvatar} />
           <h3
             className={styles.chatTitle}

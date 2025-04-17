@@ -17,6 +17,18 @@ const ChatPage = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [searchParams] = useSearchParams();
 
+  const [isMobileView, setIsMobileView] = useState(false);
+  const [showChatWindow, setShowChatWindow] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     const fetchChats = async () => {
       try {
@@ -29,13 +41,9 @@ const ChatPage = () => {
         const decoded = jwtDecode(token);
         setCurrentUser({ id: decoded.id, name: decoded.name });
 
-        // Отримуємо чати
         const chatData = await getUserChats(decoded.id);
-
-        // Отримуємо кількість непрочитаних повідомлень
         const unreadCounts = await getUnreadCounts(decoded.id);
 
-        // Додаємо `unreadCount` до кожного чату
         const updatedChats = chatData.map((chat) => ({
           ...chat,
           unreadCount: unreadCounts[chat._id] || 0,
@@ -43,14 +51,11 @@ const ChatPage = () => {
 
         setChats(updatedChats);
 
-        // Перевіряємо, чи є параметр chatId у URL
         const chatIdFromUrl = searchParams.get("chatId");
         if (chatIdFromUrl && updatedChats.length > 0) {
           const chatToSelect = updatedChats.find(
             (chat) => chat._id === chatIdFromUrl
           );
-
-          // Переконуємось, що currentUser вже встановлений
           if (chatToSelect && decoded?.id) {
             handleSelectChat(chatToSelect, decoded.id);
           }
@@ -65,15 +70,11 @@ const ChatPage = () => {
 
   const handleSelectChat = async (chat, userId) => {
     setSelectedChat(chat);
+    if (isMobileView) setShowChatWindow(true);
 
     if (chat.unreadCount > 0) {
       const userToMark = userId || currentUser?.id;
-      if (!userToMark) {
-        console.warn(
-          "⚠️ currentUser ще не ініціалізований, пропускаємо оновлення."
-        );
-        return;
-      }
+      if (!userToMark) return;
 
       await markChatAsRead(chat._id, userToMark);
       setChats((prevChats) =>
@@ -87,19 +88,33 @@ const ChatPage = () => {
   return (
     <div className={styles.chatPage}>
       {error && <p className={styles.error}>{error}</p>}
-      <ChatList
-        chats={chats}
-        onSelectChat={handleSelectChat}
-        currentUser={currentUser}
-        selectedChatId={selectedChat?._id}
-      />
-      {selectedChat ? (
-        <ChatWindow chat={selectedChat} currentUser={currentUser} />
-      ) : (
-        <div className={styles.emptyChat}>
-          <p>Оберіть чат, щоб розпочати розмову</p>
-        </div>
-      )}
+
+      {!isMobileView || !showChatWindow ? (
+        <ChatList
+          chats={chats}
+          onSelectChat={handleSelectChat}
+          currentUser={currentUser}
+          selectedChatId={selectedChat?._id}
+        />
+      ) : null}
+
+      <div
+        className={`${styles.chatWindowWrapper} ${
+          !isMobileView || showChatWindow ? styles.active : ""
+        }`}
+      >
+        {selectedChat ? (
+          <ChatWindow
+            chat={selectedChat}
+            currentUser={currentUser}
+            onBack={() => setShowChatWindow(false)}
+          />
+        ) : (
+          <div className={styles.emptyChat}>
+            <p>Оберіть чат, щоб розпочати розмову</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

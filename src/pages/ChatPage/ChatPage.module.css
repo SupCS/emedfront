@@ -3,6 +3,12 @@
   height: 100vh;
 }
 
+.chatWindowWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .emptyChat {
   flex: 1;
   display: flex;
@@ -17,4 +23,26 @@
   text-align: center;
   font-size: 1rem;
   margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .chatPage {
+    flex-direction: column;
+  }
+
+  .chatList {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    height: 100vh;
+  }
+
+  .chatWindowWrapper {
+    display: none;
+    height: 100vh;
+  }
+
+  .chatWindowWrapper.active {
+    display: block;
+  }
 }

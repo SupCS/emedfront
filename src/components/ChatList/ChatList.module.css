@@ -67,3 +67,19 @@
   border-radius: 50%;
   object-fit: cover;
 }
+
+@media (max-width: 768px) {
+  .chatList {
+    width: 100% !important;
+    padding: 10px;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    height: 100vh;
+    box-sizing: border-box;
+  }
+
+  .chatList ul {
+    max-height: calc(100vh - 130px);
+    overflow-y: auto;
+  }
+}
