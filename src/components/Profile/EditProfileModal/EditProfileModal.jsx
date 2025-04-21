@@ -106,10 +106,10 @@ function EditProfileModal({ isOpen, onClose, currentData, onUpdate }) {
         })}
 
         <div className={styles.buttons}>
-          <button className={styles.saveBtn} onClick={handleSubmit}>
+          <button className={styles.saveButton} onClick={handleSubmit}>
             Зберегти
           </button>
-          <button className={styles.cancelBtn} onClick={onClose}>
+          <button className={styles.cancelButton} onClick={onClose}>
             Скасувати
           </button>
         </div>

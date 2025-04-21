@@ -3,6 +3,7 @@ import pencilIcon from "../../assets/pencil.svg";
 import briefcaseIcon from "../../assets/briefcase.svg";
 import starIcon from "../../assets/star.svg";
 import checkIcon from "../../assets/check.svg";
+import noteIcon from "../../assets/note.svg";
 import OutlineButton from "../Buttons/OutlineButton";
 import DoctorSchedule from "../DoctorSchedule/DoctorSchedule";
 import RightBlock from "./RightBlock";
@@ -83,6 +84,21 @@ export default function DoctorProfileInfo({ profile, isOwner, onEdit }) {
             </button>
           )}
         </div>
+
+        {/* Призначення */}
+        {isOwner && (
+          <div className={styles.leftBlock}>
+            <div className={styles.prescriptionHeader}>
+              <div className={styles.iconBlock}>
+                <img src={noteIcon} alt="icon" className={styles.iconImage} />
+              </div>
+              <span>Мої призначення</span>
+            </div>
+            <OutlineButton to={`/prescriptions/doctor/${profile.id}`}>
+              Переглянути призначення
+            </OutlineButton>
+          </div>
+        )}
 
         {/* Schedule */}
         <div className={styles.leftBlock}>

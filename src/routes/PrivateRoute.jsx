@@ -2,20 +2,20 @@ import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 
-const PrivateRoute = ({ children }) => {
+const PrivateRoute = ({ children, allowedRoles }) => {
   const token = localStorage.getItem("authToken");
   const toastId = "session-expired";
 
-  const showToast = () => {
+  const showToast = (message) => {
     if (!toast.isActive(toastId)) {
-      toast.warn("Сесія недійсна або закінчилася. Увійдіть знову.", {
+      toast.warn(message || "Сесія недійсна або закінчилася. Увійдіть знову.", {
         toastId,
       });
     }
   };
 
   if (!token) {
-    showToast();
+    showToast("Авторизуйтесь для доступу.");
     return <Navigate to="/login" replace />;
   }
 
@@ -28,6 +28,11 @@ const PrivateRoute = ({ children }) => {
       localStorage.removeItem("userId");
       showToast();
       return <Navigate to="/login" replace />;
+    }
+
+    if (allowedRoles && !allowedRoles.includes(decoded.role)) {
+      showToast("У вас немає доступу до цієї сторінки.");
+      return <Navigate to="/" replace />;
     }
 
     return children;

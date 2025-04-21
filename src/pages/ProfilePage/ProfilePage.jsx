@@ -6,6 +6,7 @@ import DoctorProfileInfo from "../../components/Profile/DoctorProfileInfo";
 import PatientProfileInfo from "../../components/Profile/PatientProfileInfo";
 import { getAvatarUrl } from "../../api/avatarApi";
 import EditProfileModal from "../../components/Profile/EditProfileModal/EditProfileModal";
+import { jwtDecode } from "jwt-decode"; // ⬅️ додай
 import styles from "./ProfilePage.module.css";
 
 function ProfilePage() {
@@ -27,29 +28,26 @@ function ProfilePage() {
           setAvatar(getAvatarUrl(profileData.avatar));
         }
 
-        const currentUserId = localStorage.getItem("userId");
-        setIsOwner(currentUserId === id);
+        const token = localStorage.getItem("authToken");
+        if (token) {
+          const decoded = jwtDecode(token);
+          setIsOwner(decoded.id === id);
+        } else {
+          setIsOwner(false);
+        }
       } catch (error) {
         console.error(error);
+        navigate("/"); // або помилка
       } finally {
         setLoading(false);
       }
     }
 
     fetchData();
-  }, [role, id]);
-
-  const handleAvatarUpdate = (newAvatarPath) => {
-    setAvatar(getAvatarUrl(newAvatarPath));
-  };
+  }, [role, id, navigate]);
 
   const handleProfileUpdate = (updatedData) => {
     setProfile((prev) => ({ ...prev, ...updatedData }));
-  };
-
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
   };
 
   const openModalForFields = (fields) => {

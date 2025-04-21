@@ -11,6 +11,7 @@ import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import DoctorListPage from "../pages/DoctorListPage/DoctorListPage";
 import PrescriptionsPage from "../pages/PrescriptionsPage/PrescriptionsPage";
+import DoctorPrescriptionsPage from "../pages/PrescriptionsPage/DoctorPrescriptionPage";
 import ChatPage from "../pages/ChatPage/ChatPage";
 import AppointmentsPage from "../pages/AppointmentsPage/AppointmentsPage";
 import VideoCallPage from "../pages/VideoCallPage/VideoCallPage";
@@ -24,19 +25,18 @@ import AIAssistantWidget from "../components/AIAssistant/AIAssistantWidget";
 const Layout = ({ children }) => {
   const location = useLocation();
 
-  // Визначаємо, чи це публічна сторінка
   const isPublicRoute =
     location.pathname === "/login" ||
     location.pathname === "/register" ||
     location.pathname === "/";
 
   const isChatPage = location.pathname.startsWith("/chat");
+
   return (
     <div className={styles.container}>
       {!isPublicRoute && <Sidebar />}
       <div className={isPublicRoute ? styles.fullContent : styles.content}>
         {children}
-        {/* AI-помічник тільки на захищених сторінках */}
         {!isPublicRoute && !isChatPage && <AIAssistantWidget />}
       </div>
     </div>
@@ -75,6 +75,14 @@ function AppRouter() {
             element={
               <PrivateRoute>
                 <PrescriptionsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/prescriptions/doctor/:id"
+            element={
+              <PrivateRoute>
+                <DoctorPrescriptionsPage />
               </PrivateRoute>
             }
           />
