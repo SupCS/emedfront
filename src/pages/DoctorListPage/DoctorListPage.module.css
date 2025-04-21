@@ -69,30 +69,26 @@
   color: #777;
 }
 
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 16px;
-  flex-wrap: wrap;
+.emptyCard {
+  visibility: hidden;
 }
 
-.pageButton {
-  padding: 6px 12px;
-  background-color: #f0f0f0;
+.textInput {
+  font-size: 1rem;
+  padding: 6px 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  width: 100%;
+  min-width: 200px;
+  box-sizing: border-box;
+  line-height: 1.5;
+  background-color: #fff;
+  color: #333;
+  margin: 0;
 }
 
-.pageButton:hover {
-  background-color: #e0e0e0;
-}
-
-.pageButton.active {
-  background-color: #0066ff;
-  color: white;
-  font-weight: 600;
-  border-color: #0066ff;
+.textInput:focus {
+  border-color: #2684ff;
+  outline: none;
+  box-shadow: 0 0 0 1px #2684ff;
 }
