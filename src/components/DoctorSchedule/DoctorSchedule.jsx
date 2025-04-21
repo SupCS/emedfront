@@ -19,7 +19,7 @@ import { uk } from "date-fns/locale";
 import AddSlotForm from "./AddSlotForm";
 import ConfirmBookingModal from "../ConfirmBookingModal/ConfirmBookingModal";
 
-function DoctorSchedule({ doctorId, isOwner, doctorName }) {
+function DoctorSchedule({ doctorId, isOwner, doctorName, variant }) {
   const [schedule, setSchedule] = useState({});
   const [visibleStartDate, setVisibleStartDate] = useState(startOfToday());
   const [visibleDaysCount, setVisibleDaysCount] = useState(3);
@@ -48,6 +48,11 @@ function DoctorSchedule({ doctorId, isOwner, doctorName }) {
 
   useEffect(() => {
     const updateVisibleDays = () => {
+      console.log(variant);
+      if (variant === "modal") {
+        setVisibleDaysCount(3);
+        return;
+      }
       const width = window.innerWidth;
       if (width >= 1024) setVisibleDaysCount(4);
       else if (width >= 768) setVisibleDaysCount(3);
@@ -56,7 +61,7 @@ function DoctorSchedule({ doctorId, isOwner, doctorName }) {
     updateVisibleDays();
     window.addEventListener("resize", updateVisibleDays);
     return () => window.removeEventListener("resize", updateVisibleDays);
-  }, []);
+  }, [variant]);
 
   const handleAddSlot = async () => {
     if (!date || !startTime || !endTime) {

@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { getDoctors, getDoctorDetails } from "../api/doctorApi";
 import DoctorCard from "../components/DoctorCard";
-import DoctorModal from "../components/DoctorModal";
+import DoctorModal from "../components/DoctorModal/DoctorModal";
 import { toast } from "react-toastify";
 import { getAvatarUrl } from "../api/avatarApi";
 
