@@ -9,7 +9,7 @@ import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage/LoginPage";
 import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import ProfilePage from "../pages/ProfilePage/ProfilePage";
-import DoctorListPage from "../pages/DoctorListPage";
+import DoctorListPage from "../pages/DoctorListPage/DoctorListPage";
 import PrescriptionsPage from "../pages/PrescriptionsPage/PrescriptionsPage";
 import ChatPage from "../pages/ChatPage/ChatPage";
 import AppointmentsPage from "../pages/AppointmentsPage/AppointmentsPage";

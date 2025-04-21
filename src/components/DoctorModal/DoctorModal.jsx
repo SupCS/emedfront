@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { getDoctorSchedule } from "../../api/scheduleApi";
-import { createAppointment } from "../../api/appointmentApi";
 import { getUserChats, createChat } from "../../api/chatApi";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
@@ -25,32 +24,6 @@ function DoctorModal({ doctor, isOpen, onClose }) {
     };
     fetchSchedule();
   }, [doctor, isOpen]);
-
-  const handleBookSlot = async (date, startTime, endTime) => {
-    try {
-      await createAppointment(doctor._id, date, startTime, endTime);
-      toast.success("Ви успішно записались на прийом!");
-      setSchedule((prev) =>
-        prev
-          .map((day) =>
-            day.date === date
-              ? {
-                  ...day,
-                  slots: day.slots.filter(
-                    (slot) =>
-                      !(
-                        slot.startTime === startTime && slot.endTime === endTime
-                      )
-                  ),
-                }
-              : day
-          )
-          .filter((day) => day.slots.length > 0)
-      );
-    } catch {
-      toast.error("Не вдалося записатись на прийом.");
-    }
-  };
 
   const handleStartChat = async () => {
     try {
@@ -83,6 +56,16 @@ function DoctorModal({ doctor, isOpen, onClose }) {
     }
   };
 
+  const getYearsLabel = (n) => {
+    if (typeof n !== "number") return "-";
+    const lastDigit = n % 10;
+    const lastTwoDigits = n % 100;
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return `${n} років`;
+    if (lastDigit === 1) return `${n} рік`;
+    if (lastDigit >= 2 && lastDigit <= 4) return `${n} роки`;
+    return `${n} років`;
+  };
+
   if (!isOpen || !doctor) return null;
 
   return (
@@ -103,12 +86,22 @@ function DoctorModal({ doctor, isOpen, onClose }) {
             className={styles.avatar}
           />
           <div>
-            <h2 className={styles.name}>{doctor.name}</h2>
+            <h2 className={styles.name}>
+              <a
+                href={`profile/doctor/${doctor._id}`}
+                className={styles.nameLink}
+              >
+                {doctor.name}
+              </a>
+            </h2>
             <p className={styles.email}>{doctor.email}</p>
             <p className={styles.specialization}>{doctor.specialization}</p>
           </div>
         </div>
 
+        <p className={styles.info}>
+          <strong>Стаж:</strong> {getYearsLabel(doctor.experience)}
+        </p>
         <p className={styles.info}>
           <strong>Рейтинг:</strong> {doctor.rating ?? "Немає"} ⭐ (
           {doctor.ratingCount})
@@ -116,6 +109,7 @@ function DoctorModal({ doctor, isOpen, onClose }) {
         <p className={styles.info}>
           <strong>Про себе:</strong> {doctor.bio}
         </p>
+
         <button className={styles.chatButton} onClick={handleStartChat}>
           Почати чат
         </button>

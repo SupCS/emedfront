@@ -1,0 +1,106 @@
+.card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s;
+  cursor: pointer;
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+
+  width: 100%;
+  max-width: 260px;
+  min-width: 220px;
+  height: 280px;
+  box-sizing: border-box;
+  flex: 1 1 260px;
+  gap: 8px;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.avatar {
+  width: 92px;
+  height: 92px;
+  border-radius: 12px;
+  object-fit: cover;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+}
+
+.name {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.specialization {
+  font-size: 1rem;
+  color: #555;
+}
+
+.rating {
+  font-size: 1rem;
+  color: #333;
+}
+
+.ratingCount {
+  color: #999;
+  font-size: 0.95rem;
+}
+
+.bookButton {
+  background-color: #0066ff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  max-width: 150px;
+}
+
+.bookButton:hover {
+  background-color: #004ecc;
+}
+
+@media (max-width: 768px) {
+  .card {
+    height: auto;
+    min-height: 260px;
+    padding: 10px;
+    max-width: 100%;
+  }
+
+  .avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .name {
+    font-size: 1.2rem;
+  }
+
+  .specialization,
+  .rating {
+    font-size: 0.95rem;
+  }
+
+  .ratingCount {
+    font-size: 0.85rem;
+  }
+
+  .bookButton {
+    font-size: 0.95rem;
+    width: 100%;
+  }
+}

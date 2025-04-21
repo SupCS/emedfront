@@ -113,3 +113,12 @@
   font-weight: 600;
   color: #1a1a1a;
 }
+
+.nameLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.nameLink:hover {
+  text-decoration: underline;
+}
