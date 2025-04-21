@@ -60,9 +60,16 @@ const PrescriptionsPage = () => {
                 <strong>Лікування:</strong> {prescription.treatment}
               </p>
               <p>
-                <strong>Лікар:</strong> {prescription.doctor.name} (
-                {prescription.doctor.specialization})
+                <strong>Лікар:</strong>{" "}
+                <a
+                  className={styles.linkText}
+                  href={`/profile/doctor/${prescription.doctor._id}`}
+                >
+                  {prescription.doctor.name}
+                </a>{" "}
+                ({prescription.doctor.specialization})
               </p>
+
               <p>
                 <strong>Дійсний до:</strong>{" "}
                 {prescription.validUntil

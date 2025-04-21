@@ -4,73 +4,108 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 
-.modal {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-  max-width: 100%;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+.modalCard {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modalTitle {
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1a1a1a;
   text-align: center;
 }
 
-h2 {
-  margin-bottom: 10px;
-}
-
-label {
-  display: block;
-  margin: 10px 0;
-}
-
-input,
-textarea {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.checkbox {
+.form {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.buttons {
-  margin-top: 15px;
+.label {
+  font-size: 0.95rem;
+  color: #333;
+  text-align: left;
 }
 
-button {
-  padding: 8px 12px;
-  margin: 5px;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
+.input,
+.textarea {
+  margin-top: 0.4rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border 0.2s ease;
 }
 
-button:hover {
-  opacity: 0.8;
+.input:focus,
+.textarea:focus {
+  border-color: #0066ff;
+  outline: none;
 }
 
-.close {
-  background: red;
+.textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.saveButton {
+  background-color: #0066ff;
   color: white;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.error {
-  color: red;
+.saveButton:hover {
+  background-color: #0052cc;
 }
 
-.success {
-  color: green;
+.cancelButton {
+  background-color: #e53935;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background-color: #c62828;
 }

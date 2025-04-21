@@ -261,6 +261,61 @@
   gap: 0.5rem;
 }
 
+.prescriptionPreview {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: #1a1a1a;
+}
+
+.prescriptionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #1a1a1a;
+}
+
+.prescriptionIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.prescriptionDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prescriptionRow {
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.prescriptionRow strong {
+  font-weight: 600;
+}
+
+.plainLink {
+  text-decoration: none;
+  color: black;
+}
+
+.prescriptionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
 /* ======= Адаптив під мобільні ======= */
 @media (max-width: 768px) {
   .profileContent {
@@ -319,6 +374,10 @@
   .editButton {
     top: 10px;
     right: 10px;
+  }
+
+  .prescriptionGrid {
+    grid-template-columns: 1fr;
   }
 }
 

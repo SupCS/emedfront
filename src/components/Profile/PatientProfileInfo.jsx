@@ -1,4 +1,5 @@
-// 📄 PatientProfileInfo.jsx
+import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import styles from "./ProfileInfo.module.css";
 import pencilIcon from "../../assets/pencil.svg";
 import calendarBirthdayIcon from "../../assets/calendarBirthday.svg";
@@ -8,12 +9,27 @@ import bloodtypeIcon from "../../assets/bloodtype.svg";
 import genderIcon from "../../assets/gender.svg";
 import OutlineButton from "../Buttons/OutlineButton";
 import RightBlock from "./RightBlock";
+import noteIcon from "../../assets/note.svg";
+import { getPatientPrescriptions } from "../../api/prescriptionsApi";
 
 export default function PatientProfileInfo({ profile, isOwner, onEdit }) {
+  const [latestPrescription, setLatestPrescription] = useState(null);
+
+  useEffect(() => {
+    const fetchLatest = async () => {
+      try {
+        const data = await getPatientPrescriptions(profile.id);
+        if (data.length > 0) setLatestPrescription(data[0]);
+      } catch (e) {
+        console.error("Помилка завантаження останнього призначення", e);
+      }
+    };
+    fetchLatest();
+  }, [profile.id]);
+
   const formatDate = (isoDate) => {
-    if (!isoDate) return "";
-    const date = new Date(isoDate);
-    return date.toLocaleDateString("uk-UA");
+    if (!isoDate) return "-";
+    return new Date(isoDate).toLocaleDateString("uk-UA");
   };
 
   const calculateAge = (isoDate) => {
@@ -93,19 +109,58 @@ export default function PatientProfileInfo({ profile, isOwner, onEdit }) {
           )}
         </div>
 
-        {/* Кнопки дій */}
+        {/* Призначення */}
+        <div className={styles.leftBlock}>
+          {latestPrescription ? (
+            <div className={styles.prescriptionPreview}>
+              <div className={styles.prescriptionHeader}>
+                <div className={styles.iconBlock}>
+                  <img src={noteIcon} alt="icon" className={styles.iconImage} />
+                </div>
+                <span>Останнє призначення</span>
+              </div>
+
+              <div className={styles.prescriptionGrid}>
+                <div>
+                  <div>
+                    <strong>Діагноз:</strong> {latestPrescription.diagnosis}
+                  </div>
+                  <div>
+                    <strong>Лікар:</strong>{" "}
+                    <Link
+                      to={`/profile/doctor/${latestPrescription.doctor._id}`}
+                      className={styles.plainLink}
+                    >
+                      {latestPrescription.doctor.name}
+                    </Link>
+                  </div>
+                </div>
+                <div>
+                  <div>
+                    <strong>Дата:</strong>{" "}
+                    {formatDate(latestPrescription.createdAt)}
+                  </div>
+                  <div>
+                    <strong>Термін дії:</strong>{" "}
+                    {latestPrescription.validUntil
+                      ? formatDate(latestPrescription.validUntil)
+                      : "Без терміну дії"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>Немає жодного призначення.</div>
+          )}
+          <OutlineButton to={`/profile/patient/${profile.id}/prescriptions`}>
+            Переглянути всі призначення
+          </OutlineButton>
+        </div>
+
+        {/* Кнопка до записів */}
         {isOwner && (
           <div className={styles.leftBlock}>
-            <div className={styles.inlineButtonGroup}>
-              <OutlineButton
-                to={`/profile/patient/${profile.id}/prescriptions`}
-              >
-                Переглянути призначення
-              </OutlineButton>
-              <OutlineButton to="/appointments">
-                Переглянути записи
-              </OutlineButton>
-            </div>
+            <OutlineButton to="/appointments">Переглянути записи</OutlineButton>
           </div>
         )}
       </div>
