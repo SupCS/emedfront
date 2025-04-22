@@ -11,3 +11,9 @@
 .fullContent {
   width: 100%;
 }
+
+@media (max-width: 768px) {
+  .content {
+    margin-left: 0;
+  }
+}

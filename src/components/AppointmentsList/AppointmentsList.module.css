@@ -76,3 +76,8 @@
   color: #333;
   margin-top: 0.3rem;
 }
+
+ul {
+  margin: 0;
+  padding: 0;
+}

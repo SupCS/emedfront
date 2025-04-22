@@ -4,6 +4,7 @@
   padding: 10px;
   display: flex;
   flex-direction: column;
+  margin-left: 10px;
   gap: 10px;
 }
 
@@ -81,5 +82,9 @@
   .chatList ul {
     max-height: calc(100vh - 130px);
     overflow-y: auto;
+  }
+
+  h3 {
+    margin-left: 50px;
   }
 }

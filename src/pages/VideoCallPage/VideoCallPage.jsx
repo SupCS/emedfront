@@ -5,11 +5,7 @@ const VideoCallPage = () => {
   const { callId } = useParams();
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h2>Відеоконференція</h2>
-      <p>
-        Ви приєднались до кімнати: <strong>{callId}</strong>
-      </p>
+    <div>
       <VideoRoom />;
     </div>
   );

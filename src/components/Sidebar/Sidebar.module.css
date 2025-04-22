@@ -1,29 +1,84 @@
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css");
-@import url("https://fonts.googleapis.com/css?family=Titillium+Web:300");
 
 .sidebar {
-  background: #212121;
-  border-right: 1px solid #e5e5e5;
+  background: #f9fbff;
+  border-right: 1px solid #dfe3ea;
   position: fixed;
   top: 0;
   bottom: 0;
-  height: 100%;
   left: 0;
-  width: 50px;
+  height: 100%;
+  width: 60px;
   overflow: hidden;
-  transition: width 0.2s ease-in-out;
+  transition: width 0.2s ease-in-out, transform 0.3s ease-in-out;
   z-index: 1000;
   display: flex;
   flex-direction: column;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
 }
 
-.sidebar:hover {
-  width: 250px;
-  overflow: visible;
+/* DESKTOP: розгортаємо при hover */
+@media (min-width: 769px) {
+  .sidebar:hover {
+    width: 240px;
+    overflow: visible;
+  }
+
+  .sidebar .navText {
+    opacity: 0;
+  }
+
+  .sidebar:hover .navText {
+    opacity: 1;
+  }
 }
 
+/* MOBILE: прихований сайдбар за замовчуванням */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 240px;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .burger {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 999;
+    background: #fff;
+    border: none;
+    padding: 8px 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+
+  .burger .line {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: #333;
+    margin: 5px 0;
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 999;
+  }
+}
+
+/* Список навігації */
 .sidebar ul {
-  margin: 7px 0;
+  margin: 10px 0;
   padding: 0;
   list-style: none;
 }
@@ -38,49 +93,59 @@
   display: flex;
   align-items: center;
   width: 100%;
-  color: #b0b0b0;
-  font-family: Arial, sans-serif;
-  font-size: 16px;
+  color: #333;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 15px;
   text-decoration: none;
-  padding: 12px 15px;
+  padding: 12px 18px;
   white-space: nowrap;
   overflow: hidden;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
+  background-color: #e6ecfa;
+  color: #0066ff;
 }
 
 .sidebar .fa {
-  font-size: 24px;
-  width: 60px;
+  font-size: 20px;
+  width: 48px;
   text-align: center;
   transition: color 0.2s ease-in-out;
+  color: #646cff;
 }
 
-.sidebar .navText {
-  font-family: "Titillium Web", sans-serif;
-  font-size: 16px;
+.navText {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 15px;
   margin-left: 10px;
-  opacity: 0;
   transition: opacity 0.2s linear;
+  color: #1a1a1a;
 }
 
-.sidebar:hover .navText {
-  opacity: 1;
-}
-
-.sidebar ul.logout {
+/* Розділ виходу */
+.logout {
   position: absolute;
   left: 0;
   bottom: 20px;
   width: 100%;
 }
 
-.sidebar ul li a:hover,
-.sidebar ul li a.active {
-  color: #fff;
-  background: #333;
+.logoutLink {
+  color: #c62828;
 }
 
+.logoutLink:hover {
+  background: #fbe9e7;
+  color: #b71c1c;
+}
+
+/* Бейджик непрочитаних повідомлень */
 .unreadBadge {
-  background-color: #007bff;
+  background-color: #0066ff;
   color: white;
   font-size: 12px;
   font-weight: bold;

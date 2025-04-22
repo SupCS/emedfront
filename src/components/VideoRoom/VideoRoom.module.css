@@ -2,29 +2,174 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  padding: 1rem;
+  background-color: #f9fbff;
+  height: 100vh;
+  overflow: hidden;
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: #1a1a1a;
+  margin: 0.5rem 0;
+}
+
+p {
+  margin: 0.2rem 0 1rem;
+  font-size: 0.95rem;
+  color: #444;
 }
 
 .videoContainer {
+  position: relative;
+  flex: 1;
   display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.focusedVideo {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 960px;
+  aspect-ratio: 16/9;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: #000;
+}
+
+.miniVideo {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  width: 160px;
+  height: 120px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 3;
+  background: #000;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.equalVideo {
+  width: 48%;
+  min-width: 300px;
+  aspect-ratio: 16/9;
+  border-radius: 8px;
+  background: #000;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .video {
-  width: 320px;
-  height: 240px;
-  background: #000;
-  border: 2px solid #ccc;
-  border-radius: 8px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: #f0f0f0;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  padding: 1rem;
+  text-align: center;
 }
 
 .controls {
   display: flex;
+  justify-content: center;
   gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 0;
+}
+
+.controls button {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #646cff;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.controls button:hover {
+  background-color: #535bf2;
 }
 
 .leaveButton {
   background-color: #e74c3c;
+}
+
+.leaveButton:hover {
+  background-color: #c0392b;
+}
+
+.focusedVideo,
+.miniVideo,
+.equalVideo {
+  position: relative;
+}
+
+.videoLabel {
+  position: absolute;
+  top: 6px;
+  left: 8px;
   color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin: 0;
+  z-index: 5;
+}
+
+@media (max-width: 768px) {
+  .focusedVideo {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
+  }
+
+  .miniVideo {
+    width: 120px;
+    height: 90px;
+    bottom: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .equalVideo {
+    width: 95%;
+    aspect-ratio: 4/3;
+  }
+
+  .controls {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    align-items: center;
+  }
+
+  .controls button {
+    width: 90%;
+    max-width: 300px;
+  }
+
+  .container {
+    padding: 0.5rem;
+  }
 }

@@ -22,6 +22,7 @@ const VideoRoom = () => {
   const [remoteStream, setRemoteStream] = useState(null);
   const pcRef = useRef(null);
   const [isRemoteConnected, setIsRemoteConnected] = useState(false);
+  const [focused, setFocused] = useState("remote");
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -82,7 +83,20 @@ const VideoRoom = () => {
       event.streams[0].getTracks().forEach((track) => {
         stream.addTrack(track);
       });
-      remoteVideoRef.current.srcObject = stream;
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = stream;
+      } else {
+        console.warn(
+          "⚠️ remoteVideoRef.current is null, відкладаємо встановлення потоку."
+        );
+        const interval = setInterval(() => {
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = stream;
+            clearInterval(interval);
+            console.log("✅ Встановлено remote потік через затримку");
+          }
+        }, 100);
+      }
       setIsRemoteConnected(true);
     };
 
@@ -179,8 +193,18 @@ const VideoRoom = () => {
       </p>
 
       <div className={styles.videoContainer}>
-        <div>
-          <p>Ви ({currentRole})</p>
+        <div
+          className={
+            focused === "local"
+              ? styles.focusedVideo
+              : focused === "remote"
+              ? styles.miniVideo
+              : styles.equalVideo
+          }
+          onClick={() => setFocused(focused === "local" ? null : "local")}
+        >
+          <p className={styles.videoLabel}>Ви ({currentRole})</p>
+
           <video
             ref={localVideoRef}
             autoPlay
@@ -189,8 +213,18 @@ const VideoRoom = () => {
             className={styles.video}
           />
         </div>
-        <div>
-          <p>Опонент</p>
+
+        <div
+          className={
+            focused === "remote"
+              ? styles.focusedVideo
+              : focused === "local"
+              ? styles.miniVideo
+              : styles.equalVideo
+          }
+          onClick={() => setFocused(focused === "remote" ? null : "remote")}
+        >
+          <p className={styles.videoLabel}>Опонент</p>
           {isRemoteConnected ? (
             <video
               ref={remoteVideoRef}
