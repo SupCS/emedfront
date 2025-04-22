@@ -6,7 +6,7 @@ const VideoCallPage = () => {
 
   return (
     <div>
-      <VideoRoom />;
+      <VideoRoom />
     </div>
   );
 };

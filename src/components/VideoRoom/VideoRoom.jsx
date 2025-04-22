@@ -4,6 +4,11 @@ import { checkCallAccess } from "../../api/callApi";
 import { socket } from "../../api/socket";
 import { toast } from "react-toastify";
 import styles from "./VideoRoom.module.css";
+import cameraIcon from "../../assets/camera.svg";
+import cameraOffIcon from "../../assets/camera-off.svg";
+import microphoneIcon from "../../assets/microphone.svg";
+import microphoneOffIcon from "../../assets/microphone-off.svg";
+import exitIcon from "../../assets/exit.svg";
 
 const servers = {
   iceServers: [
@@ -196,9 +201,9 @@ const VideoRoom = () => {
         <div
           className={
             focused === "local"
-              ? styles.focusedVideo
+              ? styles.focusedVideoWrapper
               : focused === "remote"
-              ? styles.miniVideo
+              ? styles.miniVideoWrapper
               : styles.equalVideo
           }
           onClick={() => setFocused(focused === "local" ? null : "local")}
@@ -217,9 +222,9 @@ const VideoRoom = () => {
         <div
           className={
             focused === "remote"
-              ? styles.focusedVideo
+              ? styles.focusedVideoWrapper
               : focused === "local"
-              ? styles.miniVideo
+              ? styles.miniVideoWrapper
               : styles.equalVideo
           }
           onClick={() => setFocused(focused === "remote" ? null : "remote")}
@@ -242,13 +247,27 @@ const VideoRoom = () => {
 
       <div className={styles.controls}>
         <button onClick={toggleMic}>
-          {micEnabled ? "🔇 Вимкнути мікрофон" : "🎙️ Увімкнути мікрофон"}
+          <img
+            src={micEnabled ? microphoneIcon : microphoneOffIcon}
+            alt={micEnabled ? "Мікрофон увімкнено" : "Мікрофон вимкнено"}
+            className={styles.icon}
+          />
         </button>
+
         <button onClick={toggleCamera}>
-          {cameraEnabled ? "📷 Вимкнути камеру" : "📹 Увімкнути камеру"}
+          <img
+            src={cameraEnabled ? cameraIcon : cameraOffIcon}
+            alt={cameraEnabled ? "Камера увімкнена" : "Камера вимкнена"}
+            className={styles.icon}
+          />
         </button>
+
         <button onClick={leaveRoom} className={styles.leaveButton}>
-          🚪 Вийти з кімнати
+          <img
+            className={styles.icon}
+            src={exitIcon}
+            alt="Вийти з кімнати"
+          ></img>
         </button>
       </div>
     </div>
