@@ -30,16 +30,6 @@ const Sidebar = () => {
 
         // Отримуємо кількість непрочитаних повідомлень при першому завантаженні
         fetchUnreadMessages(decoded.id);
-
-        // Підписуємось на сокети
-        socket.on("receiveMessage", (message) => {
-          console.log("Отримано нове повідомлення:", message);
-          dispatch(incrementUnreadMessages()); // Збільшуємо лічильник
-        });
-
-        return () => {
-          socket.off("receiveMessage");
-        };
       } catch (error) {
         toast.error("Помилка декодування токена");
       }

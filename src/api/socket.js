@@ -1,6 +1,8 @@
+// 📄 socket.js
 import { io } from "socket.io-client";
 import { store } from "../store";
 import { addNotification } from "../store/notificationsSlice";
+import { incrementUnreadMessages } from "../store/unreadMessagesSlice";
 
 const SOCKET_URL = "http://localhost:5000";
 
@@ -19,77 +21,76 @@ export const connectSocket = () => {
     return;
   }
 
+  // 🔄 Оновлюємо токен
+  socket.auth.token = token;
+
+  // 🔌 Підключення
   if (!socket.connected) {
-    socket.auth.token = token;
     socket.connect();
     console.log("🟢 WebSocket connected");
-
-    socket.on("receiveMessage", (message) => {
-      console.log("📩 Отримано подію receiveMessage!", message);
-
-      const currentChatId = localStorage.getItem("currentChatId");
-      console.log("📌 Поточний відкритий чат:", currentChatId);
-
-      if (String(message.chat) !== String(currentChatId)) {
-        console.log("🔔 Викликаємо store.dispatch(addNotification)");
-
-        store.dispatch(
-          addNotification({
-            id: message._id,
-            chatId: message.chat,
-            senderName: message.senderName,
-            content: message.content,
-            type: "chat",
-          })
-        );
-
-        console.log("✅ Сповіщення відправлено в Redux");
-      } else {
-        console.log(
-          "✅ Повідомлення для активного чату, сповіщення не потрібне."
-        );
-      }
-    });
-
-    socket.on(
-      "appointmentStart",
-      ({ message, appointmentId, chatId, firestoreCallId }) => {
-        console.log("📅 Отримано сповіщення про початок прийому:", {
-          message,
-          appointmentId,
-          chatId,
-          firestoreCallId,
-        });
-
-        console.log("📥 Обробляємо appointmentStart подію!");
-        console.log("🔻 Дані:", {
-          message,
-          appointmentId,
-          chatId,
-          firestoreCallId,
-        });
-
-        store.dispatch(
-          addNotification({
-            id: `appt-${appointmentId}`,
-            chatId,
-            senderName: "Система",
-            content: message,
-            type: "appointment",
-            firestoreCallId,
-          })
-        );
-      }
-    );
-
-    socket.on("connect_error", (err) => {
-      console.error("🔴 Помилка WebSocket:", err);
-    });
-
-    socket.onAny((event, ...args) => {
-      console.log(`📡 Подія від сервера: ${event}`, args);
-    });
   }
+
+  // 💬 Подія нове повідомлення
+  socket.off("receiveMessage"); // очищуємо попередні
+  socket.on("receiveMessage", (message) => {
+    console.log("📩 Отримано подію receiveMessage!", message);
+
+    const currentChatId = localStorage.getItem("currentChatId");
+    console.log("📌 Поточний відкритий чат:", currentChatId);
+
+    if (String(message.chat) !== String(currentChatId)) {
+      console.log("🔔 Додаємо сповіщення і інкремент");
+
+      store.dispatch(
+        addNotification({
+          id: message._id,
+          chatId: message.chat,
+          senderName: message.senderName,
+          content: message.content,
+          type: "chat",
+        })
+      );
+
+      store.dispatch(incrementUnreadMessages());
+    } else {
+      console.log("✅ Повідомлення для активного чату, без сповіщення.");
+    }
+  });
+
+  // 📅 Початок прийому
+  socket.off("appointmentStart");
+  socket.on(
+    "appointmentStart",
+    ({ message, appointmentId, chatId, firestoreCallId }) => {
+      console.log("📅 Отримано сповіщення про початок прийому:", {
+        message,
+        appointmentId,
+        chatId,
+        firestoreCallId,
+      });
+
+      store.dispatch(
+        addNotification({
+          id: `appt-${appointmentId}`,
+          chatId,
+          senderName: "Система",
+          content: message,
+          type: "appointment",
+          firestoreCallId,
+        })
+      );
+    }
+  );
+
+  socket.off("connect_error");
+  socket.on("connect_error", (err) => {
+    console.error("🔴 Помилка WebSocket:", err);
+  });
+
+  socket.offAny(); // Очищаємо попередні onAny
+  socket.onAny((event, ...args) => {
+    console.log(`📡 Подія від сервера: ${event}`, args);
+  });
 };
 
 export const disconnectSocket = () => {
@@ -110,7 +111,7 @@ export const sendMessageSocket = (chatId, content, recipientId) => {
   }
 };
 
-// Підключаємо сокет, якщо є токен (щоб не втрачати зв’язок після оновлення сторінки)
+// Підключення одразу після завантаження, якщо є токен
 if (localStorage.getItem("authToken")) {
   connectSocket();
 }
