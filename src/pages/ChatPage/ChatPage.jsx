@@ -9,6 +9,9 @@ import {
   markChatAsRead,
 } from "../../api/chatApi";
 import styles from "./ChatPage.module.css";
+import { useDispatch } from "react-redux";
+import { decrementUnreadMessagesBy } from "../../store/unreadMessagesSlice";
+import { socket } from "../../api/socket";
 
 const ChatPage = () => {
   const [chats, setChats] = useState([]);
@@ -16,7 +19,7 @@ const ChatPage = () => {
   const [error, setError] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
   const [searchParams] = useSearchParams();
-
+  const dispatch = useDispatch();
   const [isMobileView, setIsMobileView] = useState(false);
   const [showChatWindow, setShowChatWindow] = useState(false);
 
@@ -43,7 +46,6 @@ const ChatPage = () => {
 
         const chatData = await getUserChats(decoded.id);
         const unreadCounts = await getUnreadCounts(decoded.id);
-
         const updatedChats = chatData.map((chat) => ({
           ...chat,
           unreadCount: unreadCounts[chat._id] || 0,
@@ -83,7 +85,28 @@ const ChatPage = () => {
         )
       );
     }
+    dispatch(decrementUnreadMessagesBy(chat.unreadCount));
   };
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const handleNewMessage = (message) => {
+      setChats((prevChats) =>
+        prevChats.map((chat) =>
+          chat._id === message.chat
+            ? { ...chat, unreadCount: (chat.unreadCount || 0) + 1 }
+            : chat
+        )
+      );
+    };
+
+    socket.on("receiveMessage", handleNewMessage);
+
+    return () => {
+      socket.off("receiveMessage", handleNewMessage);
+    };
+  }, [currentUser]);
 
   return (
     <div className={styles.chatPage}>

@@ -23,31 +23,38 @@ const Sidebar = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        setCurrentUser({ id: decoded.id, role: decoded.role });
+    if (!token) return;
 
-        // Отримуємо кількість непрочитаних повідомлень при першому завантаженні
-        fetchUnreadMessages(decoded.id);
-      } catch (error) {
-        toast.error("Помилка декодування токена");
-      }
-    }
-  }, [dispatch]);
-
-  const fetchUnreadMessages = async (userId) => {
     try {
-      const unreadCounts = await getUnreadCounts(userId);
-      const totalUnread = Object.values(unreadCounts).reduce(
-        (sum, count) => sum + count,
-        0
-      );
-      dispatch(setUnreadMessages(totalUnread));
+      const decoded = jwtDecode(token);
+      setCurrentUser({ id: decoded.id, role: decoded.role });
     } catch (error) {
-      console.error("Помилка отримання непрочитаних повідомлень:", error);
+      toast.error("Помилка декодування токена");
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser?.id) return;
+
+    const fetchUnreadMessages = async () => {
+      try {
+        const unreadCounts = await getUnreadCounts(currentUser.id);
+        console.log(currentUser.id);
+        console.log("🔢 unreadCounts:", unreadCounts);
+
+        const totalUnread = Object.values(unreadCounts).reduce(
+          (sum, count) => sum + count,
+          0
+        );
+
+        dispatch(setUnreadMessages(totalUnread));
+      } catch (error) {
+        console.error("Помилка отримання непрочитаних повідомлень:", error);
+      }
+    };
+
+    fetchUnreadMessages();
+  }, [currentUser?.id, dispatch]);
 
   const handleLogout = () => {
     try {
