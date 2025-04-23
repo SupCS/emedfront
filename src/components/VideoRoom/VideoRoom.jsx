@@ -1,4 +1,3 @@
-// 📄 VideoRoom.jsx
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { checkCallAccess } from "../../api/callApi";
@@ -47,6 +46,7 @@ const VideoRoom = () => {
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
   const [isRemoteConnected, setIsRemoteConnected] = useState(false);
+  const hasSentRenegotiationRef = useRef(false);
   const [focused, setFocused] = useState("remote");
 
   const pcRef = useRef(null);
@@ -93,6 +93,13 @@ const VideoRoom = () => {
   }, [remoteStream]);
 
   useEffect(() => {
+    if (remoteStream) {
+      console.log("🎬 useEffect: remoteStream оновлено:");
+      console.log("→ Треки:", remoteStream.getTracks());
+    }
+  }, [remoteStream]);
+
+  useEffect(() => {
     if (!currentRole) return;
 
     const pc = new RTCPeerConnection(servers);
@@ -100,10 +107,9 @@ const VideoRoom = () => {
     const stream = new MediaStream();
     setRemoteStream(stream);
 
-    pc.addTransceiver("audio", { direction: "sendrecv" });
-    pc.addTransceiver("video", { direction: "sendrecv" });
-    pc.addTransceiver("audio", { direction: "recvonly" });
-    pc.addTransceiver("video", { direction: "recvonly" });
+    localStream?.getTracks().forEach((track) => {
+      pc.addTrack(track, localStream);
+    });
 
     const start = async () => {
       const devices = await navigator.mediaDevices.enumerateDevices();
@@ -180,14 +186,13 @@ const VideoRoom = () => {
     };
 
     pc.ontrack = (event) => {
-      console.log(
-        "📥 Отримано remote track:",
-        event.track.kind,
-        "| enabled:",
-        event.track.enabled
-      );
-
       const incomingStream = event.streams[0];
+
+      console.log("📥 Отримано remote track:");
+      console.log("➡️ Track kind:", event.track.kind);
+      console.log("➡️ Track enabled:", event.track.enabled);
+      console.log("➡️ Stream ID:", incomingStream?.id);
+      console.log("➡️ Stream tracks:", incomingStream?.getTracks());
 
       // Призначаємо stream напряму і оновлюємо стан
       if (remoteVideoRef.current) {
@@ -201,6 +206,9 @@ const VideoRoom = () => {
             .then(() => console.log("▶️ Remote video playing"))
             .catch((e) => console.warn("⚠️ Video play failed:", e));
         }, 0);
+        console.log("📺 Призначено remoteVideoRef.srcObject");
+      } else {
+        console.warn("❗ remoteVideoRef.current ще не доступний");
       }
 
       if (remoteAudioRef.current) {
@@ -214,11 +222,15 @@ const VideoRoom = () => {
             .then(() => console.log("🎧 Remote audio playing"))
             .catch((e) => console.warn("⚠️ Audio play failed:", e));
         }, 0);
+        console.log("🔊 Призначено remoteAudioRef.srcObject");
+      } else {
+        console.warn("❗ remoteAudioRef.current ще не доступний");
       }
 
       console.log("🎧 Потік у audio:", incomingStream?.getAudioTracks());
 
       setRemoteStream(incomingStream);
+      console.log("📦 setRemoteStream виконано:", incomingStream);
       setIsRemoteConnected(true);
     };
 
@@ -231,20 +243,92 @@ const VideoRoom = () => {
 
     socket.on("user-left", () => {
       toast.info("Опонент залишив кімнату");
-      remoteStream
-        ?.getTracks()
-        .forEach((track) => remoteStream.removeTrack(track));
+      console.log("❌ Отримано user-left → очищуємо remoteStream");
+
+      remoteStream?.getTracks().forEach((track) => {
+        console.log("❌ Видаляємо трек:", track.kind);
+        remoteStream.removeTrack(track);
+      });
+
       if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
       if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null;
+
       setIsRemoteConnected(false);
     });
 
     socket.on("offer", async ({ offer }) => {
-      console.log("📩 Отримано offer SDP:", offer.sdp);
-      await pc.setRemoteDescription(new RTCSessionDescription(offer));
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      socket.emit("answer", { callId, answer });
+      let pc = pcRef.current;
+
+      if (pc.signalingState !== "stable") {
+        console.warn("⚠️ PeerConnection не stable. Перезапускаємо...");
+
+        try {
+          pc.close();
+        } catch (err) {
+          console.error("❌ Не вдалося закрити старий pc:", err);
+        }
+
+        pc = new RTCPeerConnection(servers);
+        pcRef.current = pc;
+
+        // Повторне додавання локальних треків
+        localStream?.getTracks().forEach((track) => {
+          pc.addTrack(track, localStream);
+        });
+
+        // Повторне призначення обробників
+        pc.onicecandidate = (event) => {
+          if (event.candidate) {
+            socket.emit("ice-candidate", {
+              callId,
+              candidate: event.candidate,
+            });
+          }
+        };
+
+        pc.ontrack = (event) => {
+          const incomingStream = event.streams[0];
+          console.log("📥 Отримано remote track:", event.track.kind);
+
+          setRemoteStream(incomingStream);
+          setIsRemoteConnected(true);
+
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = incomingStream;
+          }
+
+          if (remoteAudioRef.current) {
+            remoteAudioRef.current.srcObject = incomingStream;
+          }
+        };
+
+        // Далі виконати setRemoteDescription після створення нового PC
+      }
+
+      try {
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        console.log("✅ setRemoteDescription виконано");
+
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        socket.emit("answer", { callId, answer });
+        console.log("📨 Відправлено answer");
+
+        if (!hasSentRenegotiationRef.current) {
+          hasSentRenegotiationRef.current = true;
+          setTimeout(async () => {
+            if (!pcRef.current) return;
+            const renegotiationOffer = await pcRef.current.createOffer();
+            await pcRef.current.setLocalDescription(renegotiationOffer);
+            socket.emit("offer", { callId, offer: renegotiationOffer });
+            console.log(
+              "♻️ Повторно надіслано offer після answer (одноразово)"
+            );
+          }, 1000);
+        }
+      } catch (err) {
+        console.error("❌ Помилка обробки offer:", err);
+      }
     });
 
     socket.on("answer", async ({ answer }) => {
@@ -272,6 +356,43 @@ const VideoRoom = () => {
       socket.off("ice-candidate");
     };
   }, [currentRole, callId]);
+
+  useEffect(() => {
+    if (!remoteStream) return;
+
+    console.log(
+      "🎬 useEffect (перевірка готовності DOM): remoteStream оновлено"
+    );
+    console.log("→ Треки:", remoteStream.getTracks());
+
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+      remoteVideoRef.current.muted = true;
+      remoteVideoRef.current.volume = 0;
+
+      setTimeout(() => {
+        remoteVideoRef.current
+          .play()
+          .then(() => console.log("▶️ Remote video playing (from useEffect)"))
+          .catch((e) => console.warn("⚠️ Video play failed (useEffect):", e));
+      }, 0);
+    } else {
+      console.warn("⚠️ remoteVideoRef.current все ще null у useEffect");
+    }
+
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = remoteStream;
+      remoteAudioRef.current.muted = false;
+      remoteAudioRef.current.volume = 1;
+
+      setTimeout(() => {
+        remoteAudioRef.current
+          .play()
+          .then(() => console.log("🎧 Remote audio playing (from useEffect)"))
+          .catch((e) => console.warn("⚠️ Audio play failed (useEffect):", e));
+      }, 0);
+    }
+  }, [remoteStream]);
 
   const leaveRoom = () => navigate("/");
 
