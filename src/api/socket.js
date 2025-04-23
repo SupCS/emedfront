@@ -3,6 +3,8 @@ import { io } from "socket.io-client";
 import { store } from "../store";
 import { addNotification } from "../store/notificationsSlice";
 import { incrementUnreadMessages } from "../store/unreadMessagesSlice";
+import { incrementUnreadForChat } from "../store/chatListSlice";
+import { addMessageToActiveChat } from "../store/activeChatMessagesSlice";
 
 const SOCKET_URL = "http://localhost:5000";
 
@@ -38,9 +40,14 @@ export const connectSocket = () => {
     const currentChatId = localStorage.getItem("currentChatId");
     console.log("📌 Поточний відкритий чат:", currentChatId);
 
-    if (String(message.chat) !== String(currentChatId)) {
-      console.log("🔔 Додаємо сповіщення і інкремент");
-
+    if (String(message.chat) === String(currentChatId)) {
+      console.log("💬 Додаємо повідомлення в активний чат");
+      store.dispatch(addMessageToActiveChat(message));
+      // Не підвищуємо лічильники
+    } else {
+      console.log(
+        "🔔 Чат не активний — оновлюємо лічильники і додаємо сповіщення"
+      );
       store.dispatch(
         addNotification({
           id: message._id,
@@ -50,10 +57,8 @@ export const connectSocket = () => {
           type: "chat",
         })
       );
-
       store.dispatch(incrementUnreadMessages());
-    } else {
-      console.log("✅ Повідомлення для активного чату, без сповіщення.");
+      store.dispatch(incrementUnreadForChat(message.chat));
     }
   });
 

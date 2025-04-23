@@ -4,7 +4,9 @@ import { getAvatarUrl } from "../../api/avatarApi";
 
 const ChatList = ({ chats, onSelectChat, currentUser, selectedChatId }) => {
   const [searchTerm, setSearchTerm] = useState("");
-
+  if (!Array.isArray(chats) || !currentUser) {
+    return <p className={styles.noChats}>Завантаження чатів...</p>;
+  }
   const filteredChats = chats.filter((chat) => {
     const other = chat.participants.find((p) => p._id !== currentUser.id);
     return other?.name.toLowerCase().includes(searchTerm.toLowerCase());

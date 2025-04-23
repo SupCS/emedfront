@@ -1,17 +1,24 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import {
   getChatMessages,
   markChatAsRead,
   getCurrentAppointment,
 } from "../../api/chatApi";
-import { socket, connectSocket, sendMessageSocket } from "../../api/socket";
+import { socket, sendMessageSocket, connectSocket } from "../../api/socket";
 import { toast } from "react-toastify";
 import { getAvatarUrl } from "../../api/avatarApi";
 import styles from "./ChatWindow.module.css";
 import Loader from "../Loader/Loader";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setActiveChatMessages,
+  addMessageToActiveChat,
+  resetActiveChatMessages,
+} from "../../store/activeChatMessagesSlice";
 
 const ChatWindow = ({ chat, currentUser, onBack }) => {
-  const [messages, setMessages] = useState([]);
+  const dispatch = useDispatch();
+  const messages = useSelector((state) => state.activeChatMessages);
   const [newMessage, setNewMessage] = useState("");
   const [isAppointmentActive, setIsAppointmentActive] = useState(false);
   const [callId, setCallId] = useState(null);
@@ -26,13 +33,16 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
     interlocutorIndex !== -1
       ? chat.participantModel[interlocutorIndex].toLowerCase()
       : "unknown";
-  const avatar = interlocutor?.avatar
-    ? getAvatarUrl(interlocutor.avatar)
-    : "/images/default-avatar.webp";
+
+  const avatar = useMemo(() => {
+    return interlocutor?.avatar
+      ? getAvatarUrl(interlocutor.avatar)
+      : "/images/default-avatar.webp";
+  }, [interlocutor?.avatar]);
 
   useEffect(() => {
-    if (!chat || !currentUser) return;
-    if (!socket.connected) connectSocket();
+    localStorage.setItem("currentChatId", chat._id);
+    if (!connectSocket.connected) connectSocket();
 
     const fetchData = async () => {
       setIsLoading(true);
@@ -41,7 +51,7 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
           getChatMessages(chat._id),
           getCurrentAppointment(chat._id),
         ]);
-        setMessages(messagesData);
+        dispatch(setActiveChatMessages(messagesData));
         setIsAppointmentActive(appointment.isActive);
         setCallId(appointment.firestoreCallId || null);
         await markChatAsRead(chat._id, currentUser.id);
@@ -55,37 +65,10 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
     fetchData();
 
     return () => {
-      socket.off("receiveMessage");
+      localStorage.removeItem("currentChatId");
+      dispatch(resetActiveChatMessages());
     };
-  }, [chat, currentUser]);
-
-  const handleReceiveMessage = useCallback(
-    async (message) => {
-      if (String(message.chat) !== String(chat._id)) {
-        toast.info(
-          `Нове повідомлення від ${message.senderName}: ${message.content}`
-        );
-        return;
-      }
-
-      setMessages((prev) => {
-        const filtered = prev.filter(
-          (msg) => !(msg._tempId && msg.content === message.content)
-        );
-        return [...filtered, message];
-      });
-
-      await markChatAsRead(chat._id, currentUser.id);
-    },
-    [chat, currentUser]
-  );
-
-  useEffect(() => {
-    socket.on("receiveMessage", handleReceiveMessage);
-    return () => {
-      socket.off("receiveMessage", handleReceiveMessage);
-    };
-  }, [handleReceiveMessage]);
+  }, [chat, currentUser, dispatch]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -107,7 +90,6 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
-
     if (newMessage.length > 1000) {
       toast.error("Повідомлення занадто довге.");
       return;
@@ -129,7 +111,7 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
       createdAt: new Date().toISOString(),
     };
 
-    setMessages((prev) => [...prev, tempMessage]);
+    dispatch(addMessageToActiveChat(tempMessage));
     sendMessageSocket(chat._id, newMessage, recipient._id);
     setNewMessage("");
   };
@@ -155,7 +137,6 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
           <h3
             className={styles.chatTitle}
             onClick={() =>
-              interlocutor &&
               window.open(
                 `/profile/${interlocutorRole}/${interlocutor._id}`,
                 "_self"
@@ -183,17 +164,18 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
 
       <div className={styles.messages}>
         <div className={styles.imessage}>
-          {messages.map((msg) => {
-            const isMe = msg.sender === currentUser.id;
-            return (
-              <p
-                key={msg._id}
-                className={isMe ? styles.fromMe : styles.fromThem}
-              >
-                {msg.content}
-              </p>
-            );
-          })}
+          {Array.isArray(messages) &&
+            messages.map((msg) => {
+              const isMe = msg.sender === currentUser.id;
+              return (
+                <p
+                  key={msg._id}
+                  className={isMe ? styles.fromMe : styles.fromThem}
+                >
+                  {msg.content}
+                </p>
+              );
+            })}
           <div ref={messagesEndRef} />
         </div>
       </div>

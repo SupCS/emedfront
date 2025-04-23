@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useSearchParams } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import ChatList from "../../components/ChatList/ChatList";
 import ChatWindow from "../../components/ChatWindow/ChatWindow";
 import {
@@ -8,18 +9,17 @@ import {
   getUnreadCounts,
   markChatAsRead,
 } from "../../api/chatApi";
-import styles from "./ChatPage.module.css";
-import { useDispatch } from "react-redux";
+import { setChats, resetUnreadForChat } from "../../store/chatListSlice";
 import { decrementUnreadMessagesBy } from "../../store/unreadMessagesSlice";
-import { socket } from "../../api/socket";
+import styles from "./ChatPage.module.css";
 
 const ChatPage = () => {
-  const [chats, setChats] = useState([]);
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [error, setError] = useState("");
-  const [currentUser, setCurrentUser] = useState(null);
-  const [searchParams] = useSearchParams();
+  const chats = useSelector((state) => state.chatList);
   const dispatch = useDispatch();
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [error, setError] = useState("");
+  const [searchParams] = useSearchParams();
   const [isMobileView, setIsMobileView] = useState(false);
   const [showChatWindow, setShowChatWindow] = useState(false);
 
@@ -51,7 +51,7 @@ const ChatPage = () => {
           unreadCount: unreadCounts[chat._id] || 0,
         }));
 
-        setChats(updatedChats);
+        dispatch(setChats(updatedChats));
 
         const chatIdFromUrl = searchParams.get("chatId");
         if (chatIdFromUrl && updatedChats.length > 0) {
@@ -68,7 +68,7 @@ const ChatPage = () => {
     };
 
     fetchChats();
-  }, [searchParams]);
+  }, [searchParams, dispatch]);
 
   const handleSelectChat = async (chat, userId) => {
     setSelectedChat(chat);
@@ -79,40 +79,15 @@ const ChatPage = () => {
       if (!userToMark) return;
 
       await markChatAsRead(chat._id, userToMark);
-      setChats((prevChats) =>
-        prevChats.map((c) =>
-          c._id === chat._id ? { ...c, unreadCount: 0 } : c
-        )
-      );
+      dispatch(resetUnreadForChat(chat._id));
+      dispatch(decrementUnreadMessagesBy(chat.unreadCount));
     }
-    dispatch(decrementUnreadMessagesBy(chat.unreadCount));
   };
-
-  useEffect(() => {
-    if (!currentUser) return;
-
-    const handleNewMessage = (message) => {
-      setChats((prevChats) =>
-        prevChats.map((chat) =>
-          chat._id === message.chat
-            ? { ...chat, unreadCount: (chat.unreadCount || 0) + 1 }
-            : chat
-        )
-      );
-    };
-
-    socket.on("receiveMessage", handleNewMessage);
-
-    return () => {
-      socket.off("receiveMessage", handleNewMessage);
-    };
-  }, [currentUser]);
 
   return (
     <div className={styles.chatPage}>
       {error && <p className={styles.error}>{error}</p>}
-
-      {!isMobileView || !showChatWindow ? (
+      {currentUser && (!isMobileView || !showChatWindow) ? (
         <ChatList
           chats={chats}
           onSelectChat={handleSelectChat}
