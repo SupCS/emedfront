@@ -4,16 +4,13 @@ import { useSelector, useDispatch } from "react-redux";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import { getUnreadCounts } from "../../api/chatApi";
-import { socket } from "../../api/socket";
-import {
-  setUnreadMessages,
-  incrementUnreadMessages,
-} from "../../store/unreadMessagesSlice";
+import { setUnreadMessages } from "../../store/unreadMessagesSlice";
 import styles from "./Sidebar.module.css";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
   const unreadTotal = useSelector((state) => state.unreadMessages);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -23,30 +20,31 @@ const Sidebar = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-    if (!token) return;
+    if (!token) {
+      setLoadingUser(false);
+      return;
+    }
 
     try {
       const decoded = jwtDecode(token);
       setCurrentUser({ id: decoded.id, role: decoded.role });
     } catch (error) {
       toast.error("Помилка декодування токена");
+    } finally {
+      setLoadingUser(false);
     }
   }, []);
 
   useEffect(() => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id || currentUser.role === "admin") return;
 
     const fetchUnreadMessages = async () => {
       try {
         const unreadCounts = await getUnreadCounts(currentUser.id);
-        console.log(currentUser.id);
-        console.log("🔢 unreadCounts:", unreadCounts);
-
         const totalUnread = Object.values(unreadCounts).reduce(
           (sum, count) => sum + count,
           0
         );
-
         dispatch(setUnreadMessages(totalUnread));
       } catch (error) {
         console.error("Помилка отримання непрочитаних повідомлень:", error);
@@ -54,7 +52,7 @@ const Sidebar = () => {
     };
 
     fetchUnreadMessages();
-  }, [currentUser?.id, dispatch]);
+  }, [currentUser?.id, currentUser?.role, dispatch]);
 
   const handleLogout = () => {
     try {
@@ -65,6 +63,8 @@ const Sidebar = () => {
       toast.error("Помилка під час виходу");
     }
   };
+
+  if (loadingUser) return null;
 
   return (
     <>
@@ -82,6 +82,7 @@ const Sidebar = () => {
         onClick={closeSidebar}
       >
         <ul>
+          {/* Завжди доступні */}
           <li>
             <NavLink
               to="/"
@@ -91,6 +92,7 @@ const Sidebar = () => {
               <span className={styles.navText}>Головна</span>
             </NavLink>
           </li>
+
           <li>
             <NavLink
               to="/doctors"
@@ -100,48 +102,76 @@ const Sidebar = () => {
               <span className={styles.navText}>Лікарі</span>
             </NavLink>
           </li>
-          <li>
-            <NavLink
-              to="/chat"
-              className={({ isActive }) => (isActive ? styles.active : "")}
-            >
-              <i className="fa fa-comments"></i>
-              <span className={styles.navText}>
-                Чати{" "}
-                {unreadTotal > 0 && (
-                  <span className={styles.unreadBadge}>{unreadTotal}</span>
-                )}
-              </span>
-            </NavLink>
-          </li>
-          {currentUser ? (
-            <li>
-              <NavLink
-                to={`/profile/${currentUser.role}/${currentUser.id}`}
-                className={({ isActive }) => (isActive ? styles.active : "")}
-              >
-                <i className="fa fa-user"></i>
-                <span className={styles.navText}>Мій профіль</span>
-              </NavLink>
-            </li>
-          ) : (
-            <li className={styles.disabledLink}>
-              <i className="fa fa-user"></i>
-              <span className={styles.navText}>Мій профіль</span>
-            </li>
+
+          {/* Не для адміна */}
+          {currentUser?.role !== "admin" && (
+            <>
+              <li>
+                <NavLink
+                  to="/chat"
+                  className={({ isActive }) => (isActive ? styles.active : "")}
+                >
+                  <i className="fa fa-comments"></i>
+                  <span className={styles.navText}>
+                    Чати{" "}
+                    {unreadTotal > 0 && (
+                      <span className={styles.unreadBadge}>{unreadTotal}</span>
+                    )}
+                  </span>
+                </NavLink>
+              </li>
+
+              <li>
+                <NavLink
+                  to={`/profile/${currentUser.role}/${currentUser.id}`}
+                  end
+                  className={({ isActive }) => (isActive ? styles.active : "")}
+                >
+                  <i className="fa fa-user"></i>
+                  <span className={styles.navText}>Мій профіль</span>
+                </NavLink>
+              </li>
+
+              <li>
+                <NavLink
+                  to="/appointments"
+                  className={({ isActive }) => (isActive ? styles.active : "")}
+                >
+                  <i className="fa fa-calendar-check"></i>
+                  <span className={styles.navText}>Мої записи</span>
+                </NavLink>
+              </li>
+
+              <li>
+                <NavLink
+                  to={
+                    currentUser.role === "patient"
+                      ? `/profile/patient/${currentUser.id}/prescriptions`
+                      : `/prescriptions/doctor/${currentUser.id}`
+                  }
+                  className={({ isActive }) => (isActive ? styles.active : "")}
+                >
+                  <i className="fa fa-file-medical"></i>
+                  <span className={styles.navText}>Призначення</span>
+                </NavLink>
+              </li>
+            </>
           )}
-          {currentUser && (
+
+          {/* Тільки для адміна */}
+          {currentUser?.role === "admin" && (
             <li>
               <NavLink
-                to="/appointments"
+                to="/admin"
                 className={({ isActive }) => (isActive ? styles.active : "")}
               >
-                <i className="fa fa-calendar-check"></i>
-                <span className={styles.navText}>Мої записи</span>
+                <i className="fa fa-cogs"></i>
+                <span className={styles.navText}>Адмін панель</span>
               </NavLink>
             </li>
           )}
         </ul>
+
         <ul className={styles.logout}>
           <li>
             <a href="#" onClick={handleLogout} className={styles.logoutLink}>

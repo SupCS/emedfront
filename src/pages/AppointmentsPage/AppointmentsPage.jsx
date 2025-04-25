@@ -8,28 +8,44 @@ import AppointmentsList from "../../components/AppointmentsList/AppointmentsList
 import Loader from "../../components/Loader/Loader";
 import styles from "./AppointmentsPage.module.css";
 import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
 
 const AppointmentsPage = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("upcoming");
-  const role = localStorage.getItem("userRole");
-  const id = localStorage.getItem("userId");
+
   const navigate = useNavigate();
 
+  const [user, setUser] = useState({ id: null, role: null });
+
   useEffect(() => {
-    if (!id || !role) {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
       toast.error("Користувач не авторизований");
       navigate("/login");
       return;
     }
 
+    try {
+      const decoded = jwtDecode(token);
+      setUser({ id: decoded.id, role: decoded.role });
+    } catch (err) {
+      toast.error("Невірний токен");
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!user.id || !user.role) return;
+
     async function fetchAppointments() {
       try {
         const data =
-          role === "doctor"
-            ? await getDoctorAppointments(id)
-            : await getPatientAppointments(id);
+          user.role === "doctor"
+            ? await getDoctorAppointments(user.id)
+            : await getPatientAppointments(user.id);
         setAppointments(data);
       } catch (error) {
         toast.error("Помилка при завантаженні записів");
@@ -39,7 +55,7 @@ const AppointmentsPage = () => {
     }
 
     fetchAppointments();
-  }, [id, role, navigate]);
+  }, [user]);
 
   const filteredAppointments = [...appointments]
     .filter((appt) => {
@@ -117,7 +133,7 @@ const AppointmentsPage = () => {
       ) : (
         <AppointmentsList
           appointments={filteredAppointments}
-          role={role}
+          role={user.role}
           onStatusUpdate={handleStatusUpdate}
           onRated={handleMarkAsRated}
         />

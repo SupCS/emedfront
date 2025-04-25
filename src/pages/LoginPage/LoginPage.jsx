@@ -16,9 +16,6 @@ function LoginPage() {
     try {
       const data = await loginUser(email, password);
       localStorage.setItem("authToken", data.token);
-      localStorage.setItem("userRole", data.role);
-      localStorage.setItem("userId", data.user.id);
-
       connectSocket();
 
       // Відображаємо повідомлення про успішний вхід
