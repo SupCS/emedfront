@@ -21,6 +21,8 @@ import Notifications from "../components/Notifications";
 import styles from "./AppRouter.module.css";
 import PrivateRoute from "./PrivateRoute";
 import AIAssistantWidget from "../components/AIAssistant/AIAssistantWidget";
+import AdminLoginPage from "../pages/LoginPage/AdminLoginPage";
+import AdminDashboardPage from "../pages/AdminDashboardPage/AdminDashboardPage";
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -28,7 +30,8 @@ const Layout = ({ children }) => {
   const isPublicRoute =
     location.pathname === "/login" ||
     location.pathname === "/register" ||
-    location.pathname === "/";
+    location.pathname === "/" ||
+    location.pathname === "/admin-login";
 
   const isChatPage = location.pathname.startsWith("/chat");
 
@@ -50,6 +53,7 @@ function AppRouter() {
         <Routes>
           {/* Публічні маршрути */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/admin-login" element={<AdminLoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/" element={<LandingPage />} />
 
@@ -115,6 +119,14 @@ function AppRouter() {
             element={
               <PrivateRoute>
                 <VideoCallPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute allowedRoles={["admin"]}>
+                <AdminDashboardPage />
               </PrivateRoute>
             }
           />

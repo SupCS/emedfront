@@ -46,8 +46,14 @@ function ProfilePage() {
     fetchData();
   }, [role, id, navigate]);
 
-  const handleProfileUpdate = (updatedData) => {
-    setProfile((prev) => ({ ...prev, ...updatedData }));
+  const handleProfileUpdate = async () => {
+    try {
+      const updated = await getUserProfile(role, id);
+      setProfile(updated);
+      setAvatar(getAvatarUrl(updated.avatar));
+    } catch (err) {
+      console.error("Помилка оновлення профілю:", err);
+    }
   };
 
   const openModalForFields = (fields) => {

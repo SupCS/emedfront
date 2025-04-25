@@ -9,13 +9,31 @@ import TagInput from "../../Inputs/TagInput";
 const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const genders = ["male", "female", "other"];
 
-function EditProfileModal({ isOpen, onClose, currentData, onUpdate }) {
+function EditProfileModal({
+  isOpen,
+  onClose,
+  currentData,
+  onUpdate,
+  onSubmit,
+  editableFields, // масив полів, які МОЖНА редагувати
+}) {
   const [formData, setFormData] = useState({});
   const [avatarPreview, setAvatarPreview] = useState("");
 
   useEffect(() => {
-    setFormData(currentData || {});
-  }, [currentData]);
+    if (!currentData) return;
+
+    // Якщо передані editableFields — беремо тільки їх
+    const allowedData = editableFields
+      ? Object.fromEntries(
+          Object.entries(currentData).filter(([key]) =>
+            editableFields.includes(key)
+          )
+        )
+      : currentData;
+
+    setFormData(allowedData);
+  }, [currentData, editableFields]);
 
   useEffect(() => {
     if ("avatar" in currentData) {
@@ -29,9 +47,10 @@ function EditProfileModal({ isOpen, onClose, currentData, onUpdate }) {
 
   const handleSubmit = async () => {
     try {
-      await updateUserProfile(formData);
+      const updater = onSubmit || updateUserProfile;
+      const updated = await updater(formData);
       toast.success("Профіль оновлено успішно");
-      onUpdate(formData);
+      onUpdate(updated || formData);
       onClose();
     } catch (err) {
       toast.error(err?.response?.data?.message || "Помилка оновлення");
@@ -49,61 +68,63 @@ function EditProfileModal({ isOpen, onClose, currentData, onUpdate }) {
           <div className={styles.avatarSection}>
             <AvatarUploader
               initialUrl={getAvatarUrl(formData.avatar)}
-              onUpdate={(newAvatarPath) => {
+              onUpdate={(newAvatarPath) =>
                 setFormData((prev) => ({
                   ...prev,
                   avatar: newAvatarPath,
-                }));
-              }}
+                }))
+              }
             />
           </div>
         )}
 
-        {Object.entries(formData).map(([field, value]) => {
-          if (field === "avatar") return null;
+        <div className={styles.scrollableForm}>
+          {Object.entries(formData).map(([field, value]) => {
+            if (field === "avatar") return null;
 
-          return (
-            <div key={field} className={styles.inputGroup}>
-              <label>{getFieldLabel(field)}:</label>
+            return (
+              <div key={field} className={styles.inputGroup}>
+                <label>{getFieldLabel(field)}:</label>
 
-              {field === "bloodType" ? (
-                <select
-                  value={value || ""}
-                  onChange={(e) => handleChange(field, e.target.value)}
-                >
-                  <option value="">Оберіть</option>
-                  {bloodTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              ) : field === "gender" ? (
-                <select
-                  value={value || ""}
-                  onChange={(e) => handleChange(field, e.target.value)}
-                >
-                  <option value="">Оберіть</option>
-                  <option value="male">Чоловіча</option>
-                  <option value="female">Жіноча</option>
-                  <option value="other">Інша</option>
-                </select>
-              ) : field === "allergies" || field === "chronicDiseases" ? (
-                <TagInput
-                  value={Array.isArray(value) ? value : []}
-                  onChange={(tags) => handleChange(field, tags)}
-                  placeholder="Введіть значення через кому або Enter"
-                />
-              ) : (
-                <input
-                  type={getInputType(field)}
-                  value={value}
-                  onChange={(e) => handleChange(field, e.target.value)}
-                />
-              )}
-            </div>
-          );
-        })}
+                {field === "bloodType" ? (
+                  <select
+                    value={value || ""}
+                    onChange={(e) => handleChange(field, e.target.value)}
+                  >
+                    <option value="">Оберіть</option>
+                    {bloodTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                ) : field === "gender" ? (
+                  <select
+                    value={value || ""}
+                    onChange={(e) => handleChange(field, e.target.value)}
+                  >
+                    <option value="">Оберіть</option>
+                    <option value="male">Чоловіча</option>
+                    <option value="female">Жіноча</option>
+                    <option value="other">Інша</option>
+                  </select>
+                ) : field === "allergies" || field === "chronicDiseases" ? (
+                  <TagInput
+                    value={Array.isArray(value) ? value : []}
+                    onChange={(tags) => handleChange(field, tags)}
+                    placeholder="Введіть значення через кому або Enter"
+                  />
+                ) : (
+                  <input
+                    type={getInputType(field)}
+                    value={value}
+                    onChange={(e) => handleChange(field, e.target.value)}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
 
         <div className={styles.buttons}>
           <button className={styles.saveButton} onClick={handleSubmit}>
@@ -131,13 +152,15 @@ function getFieldLabel(field) {
     allergies: "Алергії",
     chronicDiseases: "Хронічні діагнози",
     bio: "Про себе",
+    specialization: "Спеціалізація",
+    experience: "Стаж (роки)",
   };
   return labels[field] || field;
 }
 
 function getInputType(field) {
   if (field === "birthDate") return "date";
-  if (["height", "weight"].includes(field)) return "number";
+  if (["height", "weight", "experience"].includes(field)) return "number";
   return "text";
 }
 

@@ -1,0 +1,37 @@
+.title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.tabMenu {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tabButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #e4e4e4;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.tabButton:hover {
+  background-color: #d0d0d0;
+}
+
+.active {
+  background-color: #3f8cff;
+  color: white;
+}
+
+.tabContent {
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 6px;
+}
