@@ -1,6 +1,6 @@
 import { useState } from "react";
 import styles from "./AdminDashboardPage.module.css";
-import DoctorsTab from "./tabs/DoctorsTab";
+import DoctorsTab from "./tabs/DoctorsTab/DoctorsTab";
 import PatientsTab from "./tabs/PatientsTab/PatientsTab";
 import AppointmentsTab from "./tabs/AppointmentsTab/AppointmentsTab";
 import PrescriptionsTab from "./tabs/PrescriptionsTab/PrescriptionsTab";

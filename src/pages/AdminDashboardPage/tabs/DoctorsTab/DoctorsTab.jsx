@@ -1,35 +1,36 @@
 import { useEffect, useState } from "react";
 import {
-  getAllPatients,
-  blockPatient,
-  unblockPatient,
-  updatePatient,
+  getAllDoctors,
+  blockDoctor,
+  unblockDoctor,
+  updateDoctor,
   removeAvatar,
+  deleteDoctor,
 } from "../../../../api/adminApi";
-import styles from "./PatientsTab.module.css";
+import styles from "./DoctorsTab.module.css";
 import Loader from "../../../../components/Loader/Loader";
 import EditProfileModal from "../../../../components/Profile/EditProfileModal/EditProfileModal";
 import pencilIcon from "../../../../assets/pencil.svg";
 import { getAvatarUrl } from "../../../../api/avatarApi";
 
-function PatientsTab() {
-  const [patients, setPatients] = useState([]);
-  const [filteredPatients, setFilteredPatients] = useState([]);
+function DoctorsTab() {
+  const [doctors, setDoctors] = useState([]);
+  const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showBlocked, setShowBlocked] = useState("all");
-  const [editingPatient, setEditingPatient] = useState(null);
+  const [editingDoctor, setEditingDoctor] = useState(null);
   const [editableFields, setEditableFields] = useState([]);
-  const [editingPatientId, setEditingPatientId] = useState(null);
+  const [editingDoctorId, setEditingDoctorId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllPatients();
-        setPatients(data);
-        setFilteredPatients(data);
+        const data = await getAllDoctors();
+        setDoctors(data);
+        setFilteredDoctors(data);
       } catch (error) {
-        console.error("❌ Error fetching patients:", error);
+        console.error("❌ Error fetching doctors:", error);
       } finally {
         setLoading(false);
       }
@@ -39,33 +40,33 @@ function PatientsTab() {
   }, []);
 
   useEffect(() => {
-    let filtered = [...patients];
+    let filtered = [...doctors];
 
     if (search.trim()) {
-      filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(search.trim().toLowerCase())
+      filtered = filtered.filter((d) =>
+        d.name.toLowerCase().includes(search.trim().toLowerCase())
       );
     }
 
     if (showBlocked === "blocked") {
-      filtered = filtered.filter((p) => p.isBlocked);
+      filtered = filtered.filter((d) => d.isBlocked);
     } else if (showBlocked === "active") {
-      filtered = filtered.filter((p) => !p.isBlocked);
+      filtered = filtered.filter((d) => !d.isBlocked);
     }
 
-    setFilteredPatients(filtered);
-  }, [search, showBlocked, patients]);
+    setFilteredDoctors(filtered);
+  }, [search, showBlocked, doctors]);
 
-  const handleBlockToggle = async (patientId, isCurrentlyBlocked) => {
+  const handleBlockToggle = async (doctorId, isCurrentlyBlocked) => {
     try {
       if (isCurrentlyBlocked) {
-        await unblockPatient(patientId);
+        await unblockDoctor(doctorId);
       } else {
-        await blockPatient(patientId);
+        await blockDoctor(doctorId);
       }
-      setPatients((prev) =>
-        prev.map((p) =>
-          p._id === patientId ? { ...p, isBlocked: !isCurrentlyBlocked } : p
+      setDoctors((prev) =>
+        prev.map((d) =>
+          d._id === doctorId ? { ...d, isBlocked: !isCurrentlyBlocked } : d
         )
       );
     } catch (error) {
@@ -75,9 +76,9 @@ function PatientsTab() {
 
   const handleAvatarRemove = async (id) => {
     try {
-      await removeAvatar("patient", id);
-      setPatients((prev) =>
-        prev.map((p) => (p._id === id ? { ...p, avatar: null } : p))
+      await removeAvatar("doctor", id);
+      setDoctors((prev) =>
+        prev.map((d) => (d._id === id ? { ...d, avatar: null } : d))
       );
     } catch (error) {
       console.error("❌ Error removing avatar:", error);
@@ -85,26 +86,39 @@ function PatientsTab() {
   };
 
   const handleUpdate = (updatedData) => {
-    setPatients((prev) =>
-      prev.map((p) => (p._id === editingPatientId ? updatedData.patient : p))
+    setDoctors((prev) =>
+      prev.map((d) => (d._id === editingDoctorId ? updatedData.doctor : d))
     );
-    setEditingPatient(null);
-    setEditingPatientId(null);
+    setEditingDoctor(null);
+    setEditingDoctorId(null);
   };
 
+  const handleDeleteDoctor = async (id, name) => {
+    const confirmed = window.confirm(
+      `Ви впевнені, що хочете видалити лікаря ${name}?`
+    );
+    if (!confirmed) return;
+
+    try {
+      await deleteDoctor(id);
+      setDoctors((prev) => prev.filter((d) => d._id !== id));
+    } catch (error) {
+      console.error("❌ Error deleting doctor:", error);
+    }
+  };
   const submitViaAdminApi = (data) => {
-    return updatePatient(editingPatientId, data);
+    return updateDoctor(editingDoctorId, data);
   };
 
   if (loading) return <Loader />;
 
   return (
     <div className={styles.container}>
-      <h2>Усі пацієнти</h2>
+      <h2>Усі лікарі</h2>
 
       <div className={styles.filters}>
         <label>
-          Пошук пацієнта:
+          Пошук лікаря:
           <input
             type="text"
             value={search}
@@ -127,75 +141,74 @@ function PatientsTab() {
         </label>
       </div>
 
-      {filteredPatients.length === 0 ? (
-        <p>Немає пацієнтів для відображення.</p>
+      {filteredDoctors.length === 0 ? (
+        <p>Немає лікарів для відображення.</p>
       ) : (
         <ul className={styles.patientList}>
-          {filteredPatients.map((patient) => (
-            <li key={patient._id} className={styles.patientItem}>
+          {filteredDoctors.map((doctor) => (
+            <li key={doctor._id} className={styles.patientItem}>
               <div className={styles.avatarWrapper}>
                 <img
-                  src={getAvatarUrl(patient.avatar)}
+                  src={getAvatarUrl(doctor.avatar)}
                   alt="avatar"
                   className={styles.avatar}
                 />
               </div>
 
-              <h3>{patient.name}</h3>
+              <h3>{doctor.name}</h3>
               <p>
-                <strong>Email:</strong> {patient.email}
+                <strong>Email:</strong> {doctor.email}
               </p>
               <p>
-                <strong>Телефон:</strong> {patient.phone || "Не вказано"}
+                <strong>Телефон:</strong> {doctor.phone || "Не вказано"}
               </p>
               <p>
-                <strong>Стать:</strong> {patient.gender || "Не вказано"}
+                <strong>Спеціалізація:</strong> {doctor.specialization || "-"}
               </p>
               <p>
-                <strong>Дата народження:</strong>{" "}
-                {patient.birthDate
-                  ? new Date(patient.birthDate).toLocaleDateString()
-                  : "Не вказано"}
+                <strong>Стаж:</strong> {doctor.experience || "—"} років
               </p>
 
               <div className={styles.buttonRow}>
                 <div className={styles.actionButtons}>
                   <button
                     onClick={() =>
-                      handleBlockToggle(patient._id, patient.isBlocked)
+                      handleBlockToggle(doctor._id, doctor.isBlocked)
                     }
                     className={
-                      patient.isBlocked
+                      doctor.isBlocked
                         ? styles.unblockButton
                         : styles.blockButton
                     }
                   >
-                    {patient.isBlocked ? "Розблокувати" : "Заблокувати"}
+                    {doctor.isBlocked ? "Розблокувати" : "Заблокувати"}
                   </button>
 
                   <button
-                    onClick={() => handleAvatarRemove(patient._id)}
+                    onClick={() => handleAvatarRemove(doctor._id)}
                     className={styles.removeAvatarButton}
                   >
                     Видалити аватар
+                  </button>
+                  <button
+                    onClick={() => handleDeleteDoctor(doctor._id, doctor.name)}
+                    className={styles.deleteButton}
+                  >
+                    Видалити акаунт лікаря
                   </button>
                 </div>
 
                 <button
                   onClick={() => {
-                    setEditingPatient(patient);
-                    setEditingPatientId(patient._id);
+                    setEditingDoctor(doctor);
+                    setEditingDoctorId(doctor._id);
                     setEditableFields([
                       "name",
                       "email",
                       "phone",
-                      "birthDate",
-                      "height",
-                      "weight",
-                      "bloodType",
-                      "gender",
-                      "allergies",
-                      "chronicDiseases",
+                      "bio",
+                      "specialization",
+                      "experience",
                     ]);
                   }}
                   className={styles.editIconButton}
@@ -212,14 +225,14 @@ function PatientsTab() {
         </ul>
       )}
 
-      {editingPatient && (
+      {editingDoctor && (
         <EditProfileModal
-          isOpen={Boolean(editingPatient)}
+          isOpen={Boolean(editingDoctor)}
           onClose={() => {
-            setEditingPatient(null);
-            setEditingPatientId(null);
+            setEditingDoctor(null);
+            setEditingDoctorId(null);
           }}
-          currentData={editingPatient}
+          currentData={editingDoctor}
           onUpdate={handleUpdate}
           onSubmit={submitViaAdminApi}
           editableFields={editableFields}
@@ -229,4 +242,4 @@ function PatientsTab() {
   );
 }
 
-export default PatientsTab;
+export default DoctorsTab;
