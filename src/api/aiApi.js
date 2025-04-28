@@ -1,6 +1,6 @@
-import { axiosInstance } from "./axiosInstance";
+import { axiosInstance, handleRequest } from "./axiosInstance";
 
 export const sendMessageToAI = async (message) => {
-  const response = await axiosInstance.post("/ai/chat", { message });
-  return response.data.response;
+  const res = await handleRequest(axiosInstance.post("/ai/chat", { message }));
+  return res.response;
 };

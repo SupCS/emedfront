@@ -2,20 +2,20 @@ import { axiosInstance, handleRequest } from "./axiosInstance";
 
 // Отримати список лікарів з фільтрацією
 export const getDoctors = async (specializations, rating) => {
-    let query = "";
+  const params = {};
 
-    if (specializations && specializations.length > 0) {
-        query += `specialization=${specializations.join(",")}`; // Об'єднуємо в один рядок
-    }
+  if (specializations?.length) {
+    params.specialization = specializations.join(",");
+  }
 
-    if (rating) {
-        query += `${query ? "&" : ""}rating=${rating}`;
-    }
+  if (rating) {
+    params.rating = rating;
+  }
 
-    return handleRequest(axiosInstance.get(`/doctors${query ? `?${query}` : ""}`));
+  return handleRequest(axiosInstance.get("/doctors", { params }));
 };
 
 // Отримання деталей лікаря
 export const getDoctorDetails = async (doctorId) => {
-    return handleRequest(axiosInstance.get(`/doctors/details/${doctorId}`));
+  return handleRequest(axiosInstance.get(`/doctors/details/${doctorId}`));
 };

@@ -1,4 +1,3 @@
-// 📄 socket.js
 import { io } from "socket.io-client";
 import { store } from "../store";
 import { addNotification } from "../store/notificationsSlice";
@@ -19,104 +18,90 @@ export const connectSocket = () => {
   const token = localStorage.getItem("authToken");
 
   if (!token) {
-    console.log("🔴 No auth token found, cannot connect to WebSocket.");
+    console.log("Токен не знайдено, підключення до WebSocket пропущено.");
     return;
   }
 
-  // 🔄 Оновлюємо токен
   socket.auth.token = token;
 
-  // 🔌 Підключення
   if (!socket.connected) {
     socket.connect();
-    console.log("🟢 WebSocket connected");
+    console.log("WebSocket підключено.");
   }
 
-  // 💬 Подія нове повідомлення
-  socket.off("receiveMessage"); // очищуємо попередні
-  socket.on("receiveMessage", (message) => {
-    console.log("📩 Отримано подію receiveMessage!", message);
+  socket.off("receiveMessage");
+  socket.on("receiveMessage", handleReceiveMessage);
 
-    const currentChatId = localStorage.getItem("currentChatId");
-    console.log("📌 Поточний відкритий чат:", currentChatId);
-
-    if (String(message.chat) === String(currentChatId)) {
-      console.log("💬 Додаємо повідомлення в активний чат");
-      store.dispatch(addMessageToActiveChat(message));
-      // Не підвищуємо лічильники
-    } else {
-      console.log(
-        "🔔 Чат не активний — оновлюємо лічильники і додаємо сповіщення"
-      );
-      store.dispatch(
-        addNotification({
-          id: message._id,
-          chatId: message.chat,
-          senderName: message.senderName,
-          content: message.content,
-          type: "chat",
-        })
-      );
-      store.dispatch(incrementUnreadMessages());
-      store.dispatch(incrementUnreadForChat(message.chat));
-    }
-  });
-
-  // 📅 Початок прийому
   socket.off("appointmentStart");
-  socket.on(
-    "appointmentStart",
-    ({ message, appointmentId, chatId, firestoreCallId }) => {
-      console.log("📅 Отримано сповіщення про початок прийому:", {
-        message,
-        appointmentId,
-        chatId,
-        firestoreCallId,
-      });
-
-      store.dispatch(
-        addNotification({
-          id: `appt-${appointmentId}`,
-          chatId,
-          senderName: "Система",
-          content: message,
-          type: "appointment",
-          firestoreCallId,
-        })
-      );
-    }
-  );
+  socket.on("appointmentStart", handleAppointmentStart);
 
   socket.off("connect_error");
   socket.on("connect_error", (err) => {
-    console.error("🔴 Помилка WebSocket:", err);
+    console.error("Помилка WebSocket:", err);
   });
 
-  socket.offAny(); // Очищаємо попередні onAny
+  socket.offAny();
   socket.onAny((event, ...args) => {
-    console.log(`📡 Подія від сервера: ${event}`, args);
+    console.log(`Подія від сервера: ${event}`, args);
   });
 };
 
 export const disconnectSocket = () => {
   if (socket.connected) {
     socket.disconnect();
-    console.log("🔴 WebSocket disconnected");
+    console.log("WebSocket відключено.");
   }
 };
 
 export const sendMessageSocket = (chatId, content, recipientId) => {
   if (socket.connected) {
     console.log(
-      `📤 Відправка повідомлення: chatId=${chatId}, recipientId=${recipientId}, content="${content}"`
+      `Надсилання повідомлення: chatId=${chatId}, recipientId=${recipientId}, content="${content}"`
     );
     socket.emit("sendMessage", { chatId, content, recipientId });
   } else {
-    console.error("🔴 WebSocket is not connected");
+    console.error("WebSocket не підключено.");
   }
 };
 
-// Підключення одразу після завантаження, якщо є токен
+const handleReceiveMessage = (message) => {
+  const currentChatId = localStorage.getItem("currentChatId");
+
+  if (String(message.chat) === String(currentChatId)) {
+    store.dispatch(addMessageToActiveChat(message));
+  } else {
+    store.dispatch(
+      addNotification({
+        id: message._id,
+        chatId: message.chat,
+        senderName: message.senderName,
+        content: message.content,
+        type: "chat",
+      })
+    );
+    store.dispatch(incrementUnreadMessages());
+    store.dispatch(incrementUnreadForChat(message.chat));
+  }
+};
+
+const handleAppointmentStart = ({
+  message,
+  appointmentId,
+  chatId,
+  firestoreCallId,
+}) => {
+  store.dispatch(
+    addNotification({
+      id: `appt-${appointmentId}`,
+      chatId,
+      senderName: "Система",
+      content: message,
+      type: "appointment",
+      firestoreCallId,
+    })
+  );
+};
+
 if (localStorage.getItem("authToken")) {
   connectSocket();
 }

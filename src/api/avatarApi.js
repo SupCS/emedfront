@@ -13,12 +13,6 @@ export const uploadAvatar = async (file) => {
 
 export const getAvatarUrl = (avatarPath) => {
   if (!avatarPath) return "/images/default-avatar.webp";
-
-  console.log("🔍 Отримано шлях аватара:", avatarPath);
-
   const cleanPath = avatarPath.replace(/^uploads\//, "");
-
-  console.log("📂 Очищений шлях:", cleanPath);
-
   return `${axiosInstance.defaults.baseURL}/profile/avatar/${cleanPath}`;
 };
