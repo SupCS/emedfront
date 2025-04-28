@@ -18,17 +18,15 @@ function LoginPage() {
       localStorage.setItem("authToken", data.token);
       connectSocket();
 
-      // Відображаємо повідомлення про успішний вхід
       toast.success("Вхід виконано успішно!");
 
-      // Перенаправляємо на відповідний профіль
       const profilePath =
         data.role === "doctor"
           ? `/profile/doctor/${data.user.id}`
           : `/profile/patient/${data.user.id}`;
       navigate(profilePath);
     } catch (error) {
-      console.error("Login error:", error.message);
+      console.error("Помилка входу:", error.message);
       toast.error(error.message || "Невірний email або пароль");
     } finally {
       setLoading(false);
@@ -37,22 +35,16 @@ function LoginPage() {
 
   return (
     <div className={styles.pageContainer}>
-      {loading ? (
-        <Loader />
-      ) : (
-        <>
-          <LoginForm onLogin={handleLogin} />
-          <p className={styles.registerText}>
-            Don&apos;t have an account?{" "}
-            <span
-              className={styles.registerLink}
-              onClick={() => navigate("/register")}
-            >
-              Register
-            </span>
-          </p>
-        </>
-      )}
+      <LoginForm onLogin={handleLogin} loading={loading} />
+      <p className={styles.registerText}>
+        Немає акаунту?{" "}
+        <span
+          className={styles.registerLink}
+          onClick={() => navigate("/register")}
+        >
+          Зареєструватися
+        </span>
+      </p>
     </div>
   );
 }

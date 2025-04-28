@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { toast } from "react-toastify";
 import styles from "./RegisterForm.module.css";
+import Loader from "../Loader/Loader";
 
-function RegisterForm({ onRegister }) {
+function RegisterForm({ onRegister, loading }) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,13 +16,7 @@ function RegisterForm({ onRegister }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    try {
-      await onRegister(formData);
-      toast.success("Реєстрація успішна!");
-    } catch (err) {
-      toast.error(err.message || "Не вдалося зареєструватися.");
-    }
+    await onRegister(formData);
   };
 
   return (
@@ -73,9 +67,15 @@ function RegisterForm({ onRegister }) {
             required
           />
         </div>
-        <button type="submit" className={styles.button}>
-          Зареєструватися
-        </button>
+        {loading ? (
+          <div className={styles.loaderContainer}>
+            <Loader />
+          </div>
+        ) : (
+          <button type="submit" className={styles.button}>
+            Зареєструватися
+          </button>
+        )}
       </form>
     </div>
   );

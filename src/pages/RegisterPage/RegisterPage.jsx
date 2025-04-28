@@ -4,7 +4,6 @@ import { registerUser } from "../../api/authApi";
 import { toast } from "react-toastify";
 import RegisterForm from "../../components/RegisterForm/RegisterForm";
 import styles from "./RegisterPage.module.css";
-import Loader from "../../components/Loader/Loader";
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -14,7 +13,7 @@ function RegisterPage() {
     setLoading(true);
     try {
       await registerUser(formData);
-      toast.success("Реєстрація успішна! Ви можете увійти.");
+      toast.success("Реєстрація успішна! Тепер увійдіть.");
       navigate("/login");
     } catch (error) {
       toast.error(error.message || "Не вдалося зареєструватися.");
@@ -22,24 +21,19 @@ function RegisterPage() {
       setLoading(false);
     }
   };
+
   return (
     <div className={styles.pageContainer}>
-      {loading ? (
-        <Loader></Loader>
-      ) : (
-        <>
-          <RegisterForm onRegister={handleRegister} />
-          <p className={styles.registerText}>
-            Вже є аккаунт?{" "}
-            <span
-              className={styles.registerLink}
-              onClick={() => navigate("/login")}
-            >
-              На сторінку логіну
-            </span>
-          </p>
-        </>
-      )}
+      <RegisterForm onRegister={handleRegister} loading={loading} />
+      <p className={styles.registerText}>
+        Вже є акаунт?{" "}
+        <span
+          className={styles.registerLink}
+          onClick={() => navigate("/login")}
+        >
+          Увійти
+        </span>
+      </p>
     </div>
   );
 }

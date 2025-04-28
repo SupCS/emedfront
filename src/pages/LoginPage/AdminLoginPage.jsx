@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import { loginAdmin } from "../../api/adminApi";
 import LoginForm from "../../components/LoginForm/LoginForm";
 import styles from "./LoginPage.module.css";
-import Loader from "../../components/Loader/Loader";
 
 function AdminLoginPage() {
   const navigate = useNavigate();
@@ -21,7 +20,7 @@ function AdminLoginPage() {
       toast.success("Адміністративний вхід успішний!");
       navigate("/admin");
     } catch (error) {
-      console.error("Admin login error:", error.message);
+      console.error("Помилка входу адміністратора:", error.message);
       toast.error(error.message || "Невірний email або пароль адміністратора");
     } finally {
       setLoading(false);
@@ -30,13 +29,7 @@ function AdminLoginPage() {
 
   return (
     <div className={styles.pageContainer}>
-      {loading ? (
-        <Loader />
-      ) : (
-        <>
-          <LoginForm onLogin={handleLogin} />
-        </>
-      )}
+      <LoginForm onLogin={handleLogin} loading={loading} />
     </div>
   );
 }
