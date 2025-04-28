@@ -155,7 +155,14 @@ function DoctorsTab() {
                 />
               </div>
 
-              <h3>{doctor.name}</h3>
+              <h3>
+                <a
+                  className={styles.linkText}
+                  href={`/profile/doctor/${doctor._id}`}
+                >
+                  {doctor.name}
+                </a>
+              </h3>
               <p>
                 <strong>Email:</strong> {doctor.email}
               </p>

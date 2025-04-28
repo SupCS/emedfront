@@ -193,10 +193,24 @@ function AppointmentsTab() {
                 - {a.endTime}
               </h3>
               <p>
-                <strong>Лікар:</strong> {a.doctor.name} ({a.doctor.email})
+                <strong>Лікар:</strong>{" "}
+                <a
+                  className={styles.linkText}
+                  href={`/profile/doctor/${a.doctor._id}`}
+                >
+                  {a.doctor.name}
+                </a>{" "}
+                ({a.doctor.email})
               </p>
               <p>
-                <strong>Пацієнт:</strong> {a.patient.name} ({a.patient.email})
+                <strong>Пацієнт:</strong>{" "}
+                <a
+                  className={styles.linkText}
+                  href={`/profile/patient/${a.patient._id}`}
+                >
+                  {a.patient.name}
+                </a>{" "}
+                ({a.patient.email})
               </p>
               <p>
                 <strong>Статус:</strong> {a.status}

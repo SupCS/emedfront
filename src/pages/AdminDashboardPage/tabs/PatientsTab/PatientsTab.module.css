@@ -154,6 +154,16 @@ h2 {
   object-fit: cover;
 }
 
+.linkText {
+  text-decoration: none;
+  font-weight: 500;
+  color: black;
+}
+
+.linkText:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   .filters {
     flex-direction: column;

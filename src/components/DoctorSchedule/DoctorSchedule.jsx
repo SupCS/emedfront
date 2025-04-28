@@ -48,7 +48,6 @@ function DoctorSchedule({ doctorId, isOwner, doctorName, variant }) {
 
   useEffect(() => {
     const updateVisibleDays = () => {
-      console.log(variant);
       if (variant === "modal") {
         setVisibleDaysCount(3);
         return;
