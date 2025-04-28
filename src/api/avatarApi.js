@@ -13,6 +13,13 @@ export const uploadAvatar = async (file) => {
 
 export const getAvatarUrl = (avatarPath) => {
   if (!avatarPath) return "/images/default-avatar.webp";
+
+  // Якщо avatarPath вже є повним URL (починається з http), повертаємо його напряму
+  if (avatarPath.startsWith("http")) {
+    return avatarPath;
+  }
+
+  // Інакше (якщо раптом залишились старі шляхи через uploads/) - fallback
   const cleanPath = avatarPath.replace(/^uploads\//, "");
   return `${axiosInstance.defaults.baseURL}/profile/avatar/${cleanPath}`;
 };

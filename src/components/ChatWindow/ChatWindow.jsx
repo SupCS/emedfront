@@ -34,10 +34,11 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
       ? chat.participantModel[interlocutorIndex].toLowerCase()
       : "unknown";
 
-  const avatar = useMemo(() => {
-    return interlocutor?.avatar
-      ? getAvatarUrl(interlocutor.avatar)
-      : "/images/default-avatar.webp";
+  const avatarUrl = useMemo(() => {
+    if (interlocutor?.avatar) {
+      return getAvatarUrl(interlocutor.avatar);
+    }
+    return "/images/default-avatar.webp";
   }, [interlocutor?.avatar]);
 
   useEffect(() => {
@@ -133,7 +134,7 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
               ← Назад
             </button>
           )}
-          <img src={avatar} alt="Avatar" className={styles.chatAvatar} />
+          <img src={avatarUrl} alt="Avatar" className={styles.chatAvatar} />
           <h3
             className={styles.chatTitle}
             onClick={() =>
