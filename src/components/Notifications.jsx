@@ -49,24 +49,26 @@ const Notifications = () => {
 };
 
 const CustomToast = ({ notif, onClick }) => {
-  const isChat = notif.type === "chat";
-  const isAppointment = notif.type === "appointment";
+  const { type, senderName, content } = notif;
+
+  let title = "";
+
+  if (type === "chat") {
+    title = `Нове повідомлення від ${senderName}`;
+  } else if (type === "appointment") {
+    title = `Починається прийом`;
+  } else if (type === "newAppointmentRequest") {
+    title = `Новий запит на прийом`;
+  } else if (type === "appointmentStatusChanged") {
+    title = `Оновлення запису на прийом`;
+  } else {
+    title = "Сповіщення";
+  }
 
   return (
-    <div
-      onClick={(e) => onClick(notif, () => toast.dismiss())}
-      style={{
-        cursor: "pointer",
-        padding: "10px",
-        borderRadius: "5px",
-        background: "#f8f9fa",
-      }}
-    >
-      <strong>
-        {isChat && `Нове повідомлення від ${notif.senderName}`}
-        {isAppointment && `Починається прийом`}
-      </strong>
-      <p>{notif.content}</p>
+    <div onClick={(e) => onClick(notif, () => toast.dismiss())}>
+      <strong>{title}</strong>
+      <p>{content}</p>
     </div>
   );
 };

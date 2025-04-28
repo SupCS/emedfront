@@ -35,6 +35,12 @@ export const connectSocket = () => {
   socket.off("appointmentStart");
   socket.on("appointmentStart", handleAppointmentStart);
 
+  socket.off("newAppointmentRequest");
+  socket.on("newAppointmentRequest", handleNewAppointmentRequest);
+
+  socket.off("appointmentStatusChanged");
+  socket.on("appointmentStatusChanged", handleAppointmentStatusChanged);
+
   socket.off("connect_error");
   socket.on("connect_error", (err) => {
     console.error("Помилка WebSocket:", err);
@@ -64,6 +70,7 @@ export const sendMessageSocket = (chatId, content, recipientId) => {
   }
 };
 
+// Отримання нового повідомлення
 const handleReceiveMessage = (message) => {
   const currentChatId = localStorage.getItem("currentChatId");
 
@@ -84,6 +91,7 @@ const handleReceiveMessage = (message) => {
   }
 };
 
+// Початок прийому
 const handleAppointmentStart = ({
   message,
   appointmentId,
@@ -98,6 +106,36 @@ const handleAppointmentStart = ({
       content: message,
       type: "appointment",
       firestoreCallId,
+    })
+  );
+};
+
+// Новий запит на прийом (для лікаря)
+const handleNewAppointmentRequest = (appointment) => {
+  store.dispatch(
+    addNotification({
+      id: `new-appt-${appointment._id}`,
+      chatId: null,
+      senderName: "Система",
+      content: `Новий запит на прийом ${appointment.date} ${appointment.startTime}-${appointment.endTime}`,
+      type: "newAppointmentRequest",
+    })
+  );
+};
+
+// Зміна статусу запису (для пацієнта)
+const handleAppointmentStatusChanged = (appointment) => {
+  store.dispatch(
+    addNotification({
+      id: `appt-status-${appointment._id}`,
+      chatId: null,
+      senderName: "Система",
+      content: `Ваш запис на ${appointment.date} о ${
+        appointment.startTime
+      } було ${
+        appointment.status === "confirmed" ? "підтверджено" : "скасовано"
+      }.`,
+      type: "appointmentStatusChanged",
     })
   );
 };
