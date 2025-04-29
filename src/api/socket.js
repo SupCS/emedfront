@@ -5,13 +5,14 @@ import { incrementUnreadMessages } from "../store/unreadMessagesSlice";
 import { incrementUnreadForChat } from "../store/chatListSlice";
 import { addMessageToActiveChat } from "../store/activeChatMessagesSlice";
 
-const SOCKET_URL = "http://localhost:5000";
+const SOCKET_URL = "https://emed-backend-fc35c553180b.herokuapp.com/";
 
 export const socket = io(SOCKET_URL, {
   auth: {
     token: localStorage.getItem("authToken"),
   },
   autoConnect: false,
+  transports: ["websocket"],
 });
 
 export const connectSocket = () => {
