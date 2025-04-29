@@ -16,6 +16,7 @@ import {
   resetActiveChatMessages,
 } from "../../store/activeChatMessagesSlice";
 import { startAppointment } from "../../store/activeAppointmentSlice";
+import { useNavigate } from "react-router-dom";
 
 const ChatWindow = ({ chat, currentUser, onBack }) => {
   const dispatch = useDispatch();
@@ -26,6 +27,7 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef(null);
+  const navigate = useNavigate();
 
   const interlocutor = chat.participants.find((p) => p._id !== currentUser.id);
   const interlocutorIndex = chat.participants.findIndex(
@@ -127,10 +129,7 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
           <h3
             className={styles.chatTitle}
             onClick={() =>
-              window.open(
-                `/profile/${interlocutorRole}/${interlocutor._id}`,
-                "_self"
-              )
+              navigate(`/profile/${interlocutorRole}/${interlocutor._id}`)
             }
             style={{ cursor: "pointer" }}
           >
