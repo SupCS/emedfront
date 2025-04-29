@@ -3,6 +3,7 @@ import notificationsReducer from "./notificationsSlice";
 import unreadMessagesReducer from "./unreadMessagesSlice";
 import chatListReducer from "./chatListSlice";
 import activeChatMessageReducer from "./activeChatMessagesSlice";
+import activeAppointmentReducer from "./activeAppointmentSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export const store = configureStore({
     unreadMessages: unreadMessagesReducer,
     chatList: chatListReducer,
     activeChatMessages: activeChatMessageReducer,
+    activeAppointment: activeAppointmentReducer,
   },
 });

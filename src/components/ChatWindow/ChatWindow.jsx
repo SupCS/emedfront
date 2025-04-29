@@ -4,7 +4,7 @@ import {
   markChatAsRead,
   getCurrentAppointment,
 } from "../../api/chatApi";
-import { socket, sendMessageSocket, connectSocket } from "../../api/socket";
+import { sendMessageSocket, connectSocket } from "../../api/socket";
 import { toast } from "react-toastify";
 import { getAvatarUrl } from "../../api/avatarApi";
 import styles from "./ChatWindow.module.css";
@@ -15,13 +15,15 @@ import {
   addMessageToActiveChat,
   resetActiveChatMessages,
 } from "../../store/activeChatMessagesSlice";
+import { startAppointment } from "../../store/activeAppointmentSlice";
 
 const ChatWindow = ({ chat, currentUser, onBack }) => {
   const dispatch = useDispatch();
   const messages = useSelector((state) => state.activeChatMessages);
+  const { isActive: isAppointmentActive, callId } = useSelector(
+    (state) => state.activeAppointment
+  );
   const [newMessage, setNewMessage] = useState("");
-  const [isAppointmentActive, setIsAppointmentActive] = useState(false);
-  const [callId, setCallId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef(null);
 
@@ -53,8 +55,9 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
           getCurrentAppointment(chat._id),
         ]);
         dispatch(setActiveChatMessages(messagesData));
-        setIsAppointmentActive(appointment.isActive);
-        setCallId(appointment.firestoreCallId || null);
+        if (appointment.isActive && appointment.firestoreCallId) {
+          dispatch(startAppointment({ callId: appointment.firestoreCallId }));
+        }
         await markChatAsRead(chat._id, currentUser.id);
       } catch (err) {
         toast.error(`Не вдалося завантажити чат: ${err.message}`);
@@ -74,20 +77,6 @@ const ChatWindow = ({ chat, currentUser, onBack }) => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  useEffect(() => {
-    const handleAppointmentStart = (payload) => {
-      if (payload.chatId === chat._id) {
-        setIsAppointmentActive(true);
-        setCallId(payload.firestoreCallId || null);
-      }
-    };
-
-    socket.on("appointmentStart", handleAppointmentStart);
-    return () => {
-      socket.off("appointmentStart", handleAppointmentStart);
-    };
-  }, [chat]);
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;

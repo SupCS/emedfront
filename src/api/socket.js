@@ -4,6 +4,7 @@ import { addNotification } from "../store/notificationsSlice";
 import { incrementUnreadMessages } from "../store/unreadMessagesSlice";
 import { incrementUnreadForChat } from "../store/chatListSlice";
 import { addMessageToActiveChat } from "../store/activeChatMessagesSlice";
+import { startAppointment } from "../store/activeAppointmentSlice";
 
 const SOCKET_URL = "https://emed-backend-fc35c553180b.herokuapp.com/";
 
@@ -99,6 +100,8 @@ const handleAppointmentStart = ({
   chatId,
   firestoreCallId,
 }) => {
+  store.dispatch(startAppointment({ callId: firestoreCallId }));
+
   store.dispatch(
     addNotification({
       id: `appt-${appointmentId}`,
