@@ -6,6 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import Loader from "../../components/Loader/Loader";
 import PrescriptionModal from "../../components/PrescriptionModal/PrescriptionModal";
 import styles from "./PrescriptionsPage.module.css";
+import { Link } from "react-router-dom";
 
 const PrescriptionsPage = () => {
   const { id } = useParams();
@@ -61,12 +62,12 @@ const PrescriptionsPage = () => {
               </p>
               <p>
                 <strong>Лікар:</strong>{" "}
-                <a
+                <Link
                   className={styles.linkText}
-                  href={`/profile/doctor/${prescription.doctor._id}`}
+                  to={`/profile/doctor/${prescription.doctor._id}`}
                 >
                   {prescription.doctor.name}
-                </a>{" "}
+                </Link>{" "}
                 ({prescription.doctor.specialization})
               </p>
 

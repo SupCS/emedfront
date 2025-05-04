@@ -12,6 +12,7 @@ import Loader from "../../../../components/Loader/Loader";
 import EditProfileModal from "../../../../components/Profile/EditProfileModal/EditProfileModal";
 import pencilIcon from "../../../../assets/pencil.svg";
 import { getAvatarUrl } from "../../../../api/avatarApi";
+import { Link } from "react-router-dom";
 
 function DoctorsTab() {
   const [doctors, setDoctors] = useState([]);
@@ -156,12 +157,12 @@ function DoctorsTab() {
               </div>
 
               <h3>
-                <a
+                <Link
                   className={styles.linkText}
-                  href={`/profile/doctor/${doctor._id}`}
+                  to={`/profile/doctor/${doctor._id}`}
                 >
                   {doctor.name}
-                </a>
+                </Link>
               </h3>
               <p>
                 <strong>Email:</strong> {doctor.email}

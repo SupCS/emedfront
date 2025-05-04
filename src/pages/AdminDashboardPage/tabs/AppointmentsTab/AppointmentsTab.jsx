@@ -7,6 +7,7 @@ import styles from "./AppointmentsTab.module.css";
 import flatpickr from "flatpickr";
 import { Ukrainian } from "flatpickr/dist/l10n/uk.js";
 import "flatpickr/dist/flatpickr.min.css";
+import { Link } from "react-router-dom";
 
 function AppointmentsTab() {
   const [appointments, setAppointments] = useState([]);
@@ -194,22 +195,22 @@ function AppointmentsTab() {
               </h3>
               <p>
                 <strong>Лікар:</strong>{" "}
-                <a
+                <Link
                   className={styles.linkText}
-                  href={`/profile/doctor/${a.doctor._id}`}
+                  to={`/profile/doctor/${a.doctor._id}`}
                 >
                   {a.doctor.name}
-                </a>{" "}
+                </Link>{" "}
                 ({a.doctor.email})
               </p>
               <p>
                 <strong>Пацієнт:</strong>{" "}
-                <a
+                <Link
                   className={styles.linkText}
-                  href={`/profile/patient/${a.patient._id}`}
+                  to={`/profile/patient/${a.patient._id}`}
                 >
                   {a.patient.name}
-                </a>{" "}
+                </Link>{" "}
                 ({a.patient.email})
               </p>
               <p>

@@ -11,6 +11,7 @@ import Loader from "../../../../components/Loader/Loader";
 import EditProfileModal from "../../../../components/Profile/EditProfileModal/EditProfileModal";
 import pencilIcon from "../../../../assets/pencil.svg";
 import { getAvatarUrl } from "../../../../api/avatarApi";
+import { Link } from "react-router-dom";
 
 function PatientsTab() {
   const [patients, setPatients] = useState([]);
@@ -143,12 +144,12 @@ function PatientsTab() {
 
               <h3>
                 {" "}
-                <a
+                <Link
                   className={styles.linkText}
-                  href={`/profile/patient/${patient._id}`}
+                  to={`/profile/patient/${patient._id}`}
                 >
                   {patient.name}
-                </a>
+                </Link>
               </h3>
               <p>
                 <strong>Email:</strong> {patient.email}

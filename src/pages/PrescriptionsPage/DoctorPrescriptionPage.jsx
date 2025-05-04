@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import { getDoctorPrescriptions } from "../../api/prescriptionsApi";
 import Loader from "../../components/Loader/Loader";
 import styles from "./PrescriptionsPage.module.css";
+import { Link } from "react-router-dom";
 
 const DoctorPrescriptionsPage = () => {
   const navigate = useNavigate();
@@ -60,12 +61,12 @@ const DoctorPrescriptionsPage = () => {
               </p>
               <p>
                 <strong>Пацієнт:</strong>{" "}
-                <a
+                <Link
                   className={styles.linkText}
-                  href={`/profile/patient/${prescription.patient._id}`}
+                  to={`/profile/patient/${prescription.patient._id}`}
                 >
                   {prescription.patient.name}
-                </a>{" "}
+                </Link>{" "}
                 ({prescription.patient.email})
               </p>
               <p>

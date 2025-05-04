@@ -3,6 +3,7 @@ import { updateAppointmentStatus } from "../../api/appointmentApi";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import RatingModal from "../RatingModal/RatingModal";
+import { Link } from "react-router-dom";
 
 const statusStyles = {
   pending: { color: "#ffc107", label: "Очікує підтвердження" },
@@ -55,11 +56,26 @@ function AppointmentsList({ appointments, role, onStatusUpdate, onRated }) {
                   </div>
                   <div>
                     {role === "doctor" ? (
-                      <strong>Пацієнт:</strong>
+                      <>
+                        <strong>Пацієнт:</strong>{" "}
+                        <Link
+                          className={styles.linkText}
+                          to={`/profile/patient/${appt.patient._id}`}
+                        >
+                          {appt.patient.name}
+                        </Link>
+                      </>
                     ) : (
-                      <strong>Лікар:</strong>
-                    )}{" "}
-                    {role === "doctor" ? appt.patient.name : appt.doctor.name}
+                      <>
+                        <strong>Лікар:</strong>{" "}
+                        <Link
+                          className={styles.linkText}
+                          to={`/profile/doctor/${appt.doctor._id}`}
+                        >
+                          {appt.doctor.name}
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </div>
 

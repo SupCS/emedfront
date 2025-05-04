@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import DoctorSchedule from "../DoctorSchedule/DoctorSchedule";
 import styles from "./DoctorModal.module.css";
+import { Link } from "react-router-dom";
 
 function DoctorModal({ doctor, isOpen, onClose }) {
   const [schedule, setSchedule] = useState([]);
@@ -87,12 +88,12 @@ function DoctorModal({ doctor, isOpen, onClose }) {
           />
           <div>
             <h2 className={styles.name}>
-              <a
-                href={`profile/doctor/${doctor._id}`}
+              <Link
+                to={`/profile/doctor/${doctor._id}`}
                 className={styles.nameLink}
               >
                 {doctor.name}
-              </a>
+              </Link>
             </h2>
             <p className={styles.email}>{doctor.email}</p>
             <p className={styles.specialization}>{doctor.specialization}</p>

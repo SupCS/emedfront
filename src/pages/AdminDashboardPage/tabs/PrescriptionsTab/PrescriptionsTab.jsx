@@ -8,6 +8,7 @@ import Loader from "../../../../components/Loader/Loader";
 import flatpickr from "flatpickr";
 import { Ukrainian } from "flatpickr/dist/l10n/uk.js";
 import "flatpickr/dist/flatpickr.min.css";
+import { Link } from "react-router-dom";
 
 function PrescriptionsTab() {
   const [prescriptions, setPrescriptions] = useState([]);
@@ -164,22 +165,22 @@ function PrescriptionsTab() {
               </p>
               <p>
                 <strong>Лікар:</strong>{" "}
-                <a
+                <Link
                   className={styles.linkText}
-                  href={`/profile/doctor/${prescription.doctor._id}`}
+                  to={`/profile/doctor/${prescription.doctor._id}`}
                 >
                   {prescription.doctor.name}
-                </a>{" "}
+                </Link>{" "}
                 ({prescription.doctor.email})
               </p>
               <p>
                 <strong>Пацієнт:</strong>{" "}
-                <a
+                <Link
                   className={styles.linkText}
-                  href={`/profile/patient/${prescription.patient._id}`}
+                  to={`/profile/patient/${prescription.patient._id}`}
                 >
                   {prescription.patient.name}
-                </a>{" "}
+                </Link>{" "}
                 ({prescription.patient.email})
               </p>
               <p>
