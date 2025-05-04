@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { getAdminStats } from "../../../../api/adminApi";
+import {
+  getAdminStats,
+  getDoctorStats,
+  getAllDoctors,
+} from "../../../../api/adminApi";
 import flatpickr from "flatpickr";
 import { Ukrainian } from "flatpickr/dist/l10n/uk.js";
 import "flatpickr/dist/flatpickr.min.css";
@@ -25,27 +29,37 @@ function StatsTab() {
     new Date(new Date().setMonth(new Date().getMonth() - 1))
   );
   const [to, setTo] = useState(new Date());
+  const [doctors, setDoctors] = useState([]);
+  const [selectedDoctorId, setSelectedDoctorId] = useState("all");
 
   const fromRef = useRef(null);
   const toRef = useRef(null);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const result = await getAllDoctors();
+        setDoctors(result);
+      } catch (error) {
+        console.error("❌ Не вдалося завантажити лікарів:", error);
+      }
+    };
+    fetchDoctors();
+  }, []);
 
   useEffect(() => {
     const fromPicker = flatpickr(fromRef.current, {
       locale: Ukrainian,
       dateFormat: "Y-m-d",
       defaultDate: from,
-      onChange: ([date]) => {
-        setFrom(date);
-      },
+      onChange: ([date]) => setFrom(date),
     });
 
     const toPicker = flatpickr(toRef.current, {
       locale: Ukrainian,
       dateFormat: "Y-m-d",
       defaultDate: to,
-      onChange: ([date]) => {
-        setTo(date);
-      },
+      onChange: ([date]) => setTo(date),
     });
 
     return () => {
@@ -56,7 +70,7 @@ function StatsTab() {
 
   useEffect(() => {
     fetchStats();
-  }, [from, to]);
+  }, [from, to, selectedDoctorId]);
 
   const formatLocalDate = (date) => {
     const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -67,7 +81,6 @@ function StatsTab() {
     try {
       const start = new Date(from);
       start.setHours(0, 0, 0, 0);
-
       const end = new Date(to);
       end.setHours(23, 59, 59, 999);
 
@@ -76,10 +89,20 @@ function StatsTab() {
         to: formatLocalDate(end),
       };
 
-      const data = await getAdminStats(params);
+      const data =
+        selectedDoctorId === "all"
+          ? await getAdminStats(params)
+          : await getDoctorStats(selectedDoctorId, params);
+
+      // Якщо бек повертає "totalPatients" тільки для all, додаємо дефолтні значення для лікаря
+      if (selectedDoctorId !== "all") {
+        data.totalDoctors = 1;
+        data.totalPatients = "—";
+      }
+
       setStats(data);
     } catch (error) {
-      console.error("❌ Помилка при завантаженні статистики:", error);
+      console.error("Помилка при завантаженні статистики:", error);
     }
   };
 
@@ -110,6 +133,20 @@ function StatsTab() {
         <label>
           По:
           <input ref={toRef} readOnly />
+        </label>
+        <label>
+          Лікар:
+          <select
+            value={selectedDoctorId}
+            onChange={(e) => setSelectedDoctorId(e.target.value)}
+          >
+            <option value="all">Усі</option>
+            {doctors.map((d) => (
+              <option key={d._id} value={d._id}>
+                {d.name}
+              </option>
+            ))}
+          </select>
         </label>
       </div>
 

@@ -91,3 +91,9 @@ export const deletePrescription = async (prescriptionId) => {
 export const getAdminStats = async (params) => {
   return handleRequest(axiosInstance.get("/admin/stats", { params }));
 };
+
+export const getDoctorStats = async (doctorId, params) => {
+  return handleRequest(
+    axiosInstance.get(`/admin/stats/doctor/${doctorId}`, { params })
+  );
+};
