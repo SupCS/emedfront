@@ -10,9 +10,11 @@ import {
 import styles from "./DoctorsTab.module.css";
 import Loader from "../../../../components/Loader/Loader";
 import EditProfileModal from "../../../../components/Profile/EditProfileModal/EditProfileModal";
+import AddDoctorModal from "../../../../components/AddDoctorModal/AddDoctorModal";
 import pencilIcon from "../../../../assets/pencil.svg";
 import { getAvatarUrl } from "../../../../api/avatarApi";
 import { Link } from "react-router-dom";
+import PrimaryButton from "../../../../components/Buttons/PrimaryButton";
 
 function DoctorsTab() {
   const [doctors, setDoctors] = useState([]);
@@ -23,6 +25,7 @@ function DoctorsTab() {
   const [editingDoctor, setEditingDoctor] = useState(null);
   const [editableFields, setEditableFields] = useState([]);
   const [editingDoctorId, setEditingDoctorId] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -94,6 +97,11 @@ function DoctorsTab() {
     setEditingDoctorId(null);
   };
 
+  const handleAddDoctor = (newDoctor) => {
+    setDoctors((prev) => [...prev, newDoctor]);
+    setShowAddModal(false);
+  };
+
   const handleDeleteDoctor = async (id, name) => {
     const confirmed = window.confirm(
       `Ви впевнені, що хочете видалити лікаря ${name}?`
@@ -115,7 +123,15 @@ function DoctorsTab() {
 
   return (
     <div className={styles.container}>
-      <h2>Усі лікарі</h2>
+      <div className={styles.headerRow}>
+        <h2>Усі лікарі</h2>
+        <button
+          className={styles.addButton}
+          onClick={() => setShowAddModal(true)}
+        >
+          + Додати лікаря
+        </button>
+      </div>
 
       <div className={styles.filters}>
         <label>
@@ -244,6 +260,14 @@ function DoctorsTab() {
           onUpdate={handleUpdate}
           onSubmit={submitViaAdminApi}
           editableFields={editableFields}
+        />
+      )}
+
+      {showAddModal && (
+        <AddDoctorModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          onCreated={handleAddDoctor}
         />
       )}
     </div>
