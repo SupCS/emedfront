@@ -8,6 +8,7 @@ import flatpickr from "flatpickr";
 import { Ukrainian } from "flatpickr/dist/l10n/uk.js";
 import "flatpickr/dist/flatpickr.min.css";
 import { Link } from "react-router-dom";
+import CancelReasonModal from "../../../../components/AppointmentsList/CancelReasonModal";
 
 function AppointmentsTab() {
   const [appointments, setAppointments] = useState([]);
@@ -20,6 +21,8 @@ function AppointmentsTab() {
   const [from, setFrom] = useState(null);
   const [to, setTo] = useState(null);
   const [sortDirection, setSortDirection] = useState("desc");
+
+  const [cancelModalId, setCancelModalId] = useState(null);
 
   const fromRef = useRef(null);
   const toRef = useRef(null);
@@ -115,19 +118,16 @@ function AppointmentsTab() {
     setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
-  const handleCancel = async (id, status) => {
-    const confirmed = window.confirm(
-      "Ви впевнені, що хочете скасувати цей запис?"
-    );
-    if (!confirmed) return;
-
+  const handleCancel = async (id, reason) => {
     try {
-      await cancelAppointment(id);
+      await cancelAppointment(id, reason);
       setAppointments((prev) =>
-        prev.map((a) => (a._id === id ? { ...a, status: "cancelled" } : a))
+        prev.map((a) =>
+          a._id === id ? { ...a, status: "cancelled", cancelReason: reason } : a
+        )
       );
     } catch (error) {
-      console.error("❌ Error cancelling appointment:", error);
+      console.error("Помилка при скасуванні прийому:", error);
     }
   };
 
@@ -222,7 +222,7 @@ function AppointmentsTab() {
               </p>
               {!["cancelled", "passed"].includes(a.status) && (
                 <button
-                  onClick={() => handleCancel(a._id, a.status)}
+                  onClick={() => setCancelModalId(a._id)}
                   style={{
                     marginTop: "8px",
                     backgroundColor: "#dc2626",
@@ -236,9 +236,25 @@ function AppointmentsTab() {
                   Скасувати
                 </button>
               )}
+              {a.status === "cancelled" && a.cancelReason && (
+                <p style={{ marginTop: "8px", color: "#991b1b" }}>
+                  <strong>Причина скасування:</strong> {a.cancelReason}
+                </p>
+              )}
             </li>
           ))}
         </ul>
+      )}
+
+      {cancelModalId && (
+        <CancelReasonModal
+          isOpen={Boolean(cancelModalId)}
+          onClose={() => setCancelModalId(null)}
+          onSubmit={(reason) => {
+            handleCancel(cancelModalId, reason);
+            setCancelModalId(null);
+          }}
+        />
       )}
     </div>
   );

@@ -30,8 +30,8 @@ export const updateAppointmentStatus = async (appointmentId, status) => {
 };
 
 // Скасування підтвердженого appointment
-export const cancelConfirmedAppointment = async (appointmentId) => {
+export const cancelConfirmedAppointment = async (appointmentId, reason) => {
   return handleRequest(
-    axiosInstance.patch(`/appointments/${appointmentId}/cancel`)
+    axiosInstance.patch(`/appointments/${appointmentId}/cancel`, { reason })
   );
 };

@@ -70,9 +70,11 @@ export const getAllAppointments = async () => {
   return handleRequest(axiosInstance.get("/admin/appointments"));
 };
 
-export const cancelAppointment = async (appointmentId) => {
+export const cancelAppointment = async (appointmentId, reason) => {
   return handleRequest(
-    axiosInstance.patch(`/admin/appointments/${appointmentId}/cancel`)
+    axiosInstance.patch(`/admin/appointments/${appointmentId}/cancel`, {
+      reason,
+    })
   );
 };
 

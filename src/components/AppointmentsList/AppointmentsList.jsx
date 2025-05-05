@@ -1,8 +1,12 @@
 import styles from "./AppointmentsList.module.css";
-import { updateAppointmentStatus } from "../../api/appointmentApi";
+import {
+  updateAppointmentStatus,
+  cancelConfirmedAppointment,
+} from "../../api/appointmentApi";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import RatingModal from "../RatingModal/RatingModal";
+import CancelReasonModal from "./CancelReasonModal";
 import { Link } from "react-router-dom";
 
 const statusStyles = {
@@ -15,10 +19,16 @@ const statusStyles = {
 function AppointmentsList({ appointments, role, onStatusUpdate, onRated }) {
   console.log(appointments);
   const [ratingAppointmentId, setRatingAppointmentId] = useState(null);
+  const [cancelModalId, setCancelModalId] = useState(null);
 
-  const handleStatusChange = async (appointmentId, newStatus) => {
+  const handleStatusChange = async (appointmentId, newStatus, cancelReason) => {
     try {
-      await updateAppointmentStatus(appointmentId, newStatus);
+      if (newStatus === "cancelled") {
+        await cancelConfirmedAppointment(appointmentId, cancelReason);
+      } else {
+        await updateAppointmentStatus(appointmentId, newStatus);
+      }
+
       toast.success(
         `Статус змінено на "${
           newStatus === "confirmed" ? "Підтверджено" : "Скасовано"
@@ -100,9 +110,7 @@ function AppointmentsList({ appointments, role, onStatusUpdate, onRated }) {
                       </button>
                       <button
                         className={styles.cancelButton}
-                        onClick={() =>
-                          handleStatusChange(appt._id, "cancelled")
-                        }
+                        onClick={() => setCancelModalId(appt._id)}
                       >
                         Відхилити
                       </button>
@@ -114,14 +122,7 @@ function AppointmentsList({ appointments, role, onStatusUpdate, onRated }) {
                       <div className={styles.buttonGroup}>
                         <button
                           className={styles.cancelButton}
-                          onClick={() => {
-                            const confirmed = window.confirm(
-                              "Ви впевнені, що хочете скасувати підтверджений запис? Це незворотна дія."
-                            );
-                            if (confirmed) {
-                              handleStatusChange(appt._id, "cancelled");
-                            }
-                          }}
+                          onClick={() => setCancelModalId(appt._id)}
                         >
                           Скасувати
                         </button>
@@ -142,6 +143,12 @@ function AppointmentsList({ appointments, role, onStatusUpdate, onRated }) {
                         Оцінити
                       </button>
                     ))}
+
+                  {appt.status === "cancelled" && appt.cancelReason && (
+                    <div className={styles.cancelReason}>
+                      <strong>Причина скасування:</strong> {appt.cancelReason}
+                    </div>
+                  )}
                 </div>
               </li>
             );
@@ -159,6 +166,17 @@ function AppointmentsList({ appointments, role, onStatusUpdate, onRated }) {
           onRated={(value) => {
             handleRated(ratingAppointmentId, value);
             setRatingAppointmentId(null);
+          }}
+        />
+      )}
+
+      {cancelModalId && (
+        <CancelReasonModal
+          isOpen={Boolean(cancelModalId)}
+          onClose={() => setCancelModalId(null)}
+          onSubmit={(reason) => {
+            handleStatusChange(cancelModalId, "cancelled", reason);
+            setCancelModalId(null);
           }}
         />
       )}
