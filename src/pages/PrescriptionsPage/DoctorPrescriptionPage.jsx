@@ -1,45 +1,43 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 import { getDoctorPrescriptions } from "../../api/prescriptionsApi";
 import Loader from "../../components/Loader/Loader";
 import styles from "./PrescriptionsPage.module.css";
-import { Link } from "react-router-dom";
 
 const DoctorPrescriptionsPage = () => {
   const navigate = useNavigate();
   const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchPrescriptions = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
+  const fetchPrescriptions = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
 
-        if (!token) {
-          toast.error("Ви не авторизовані.");
-          navigate("/login");
-          return;
-        }
-
-        const decoded = jwtDecode(token);
-        if (decoded.role !== "doctor") {
-          toast.error("Доступ дозволено лише лікарям.");
-          navigate("/");
-          return;
-        }
-
-        const doctorId = decoded.id;
-        const data = await getDoctorPrescriptions(doctorId);
-        setPrescriptions(data);
-      } catch (err) {
-        toast.error(err.message || "Не вдалося завантажити призначення.");
-      } finally {
-        setLoading(false);
+      if (!token) {
+        toast.error("Ви не авторизовані.");
+        navigate("/login");
+        return;
       }
-    };
 
+      const decoded = jwtDecode(token);
+      if (decoded.role !== "doctor") {
+        toast.error("Доступ дозволено лише лікарям.");
+        navigate("/");
+        return;
+      }
+
+      const data = await getDoctorPrescriptions(decoded.id);
+      setPrescriptions(data);
+    } catch (err) {
+      toast.error(err.message || "Не вдалося завантажити призначення.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchPrescriptions();
   }, [navigate]);
 
@@ -69,12 +67,16 @@ const DoctorPrescriptionsPage = () => {
                 </Link>{" "}
                 ({prescription.patient.email})
               </p>
-              <p>
-                <strong>Дійсний до:</strong>{" "}
-                {prescription.validUntil
-                  ? new Date(prescription.validUntil).toLocaleDateString()
-                  : "Без терміну дії"}
-              </p>
+              {prescription.pdfUrl && (
+                <a
+                  href={prescription.pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.pdfLink}
+                >
+                  📄 Переглянути PDF
+                </a>
+              )}
             </li>
           ))}
         </ul>

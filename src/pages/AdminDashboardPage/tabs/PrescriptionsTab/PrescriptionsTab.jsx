@@ -153,48 +153,55 @@ function PrescriptionsTab() {
         </button>
       </div>
 
+      {console.log(filteredPrescriptions)}
+
       {filteredPrescriptions.length === 0 ? (
         <p>Немає доступних призначень.</p>
       ) : (
         <ul className={styles.prescriptionList}>
-          {filteredPrescriptions.map((prescription) => (
-            <li key={prescription._id} className={styles.prescriptionItem}>
-              <h3>Діагноз: {prescription.diagnosis}</h3>
+          {filteredPrescriptions.map((p) => (
+            <li key={p._id} className={styles.prescriptionItem}>
+              <h3>Діагноз: {p.diagnosis}</h3>
               <p>
-                <strong>Лікування:</strong> {prescription.treatment}
+                <strong>Лікування:</strong> {p.treatment}
               </p>
               <p>
                 <strong>Лікар:</strong>{" "}
                 <Link
                   className={styles.linkText}
-                  to={`/profile/doctor/${prescription.doctor._id}`}
+                  to={`/profile/doctor/${p.doctor._id}`}
                 >
-                  {prescription.doctor.name}
+                  {p.doctor.name}
                 </Link>{" "}
-                ({prescription.doctor.email})
+                ({p.doctor.specialization})
               </p>
               <p>
                 <strong>Пацієнт:</strong>{" "}
                 <Link
                   className={styles.linkText}
-                  to={`/profile/patient/${prescription.patient._id}`}
+                  to={`/profile/patient/${p.patient._id}`}
                 >
-                  {prescription.patient.name}
-                </Link>{" "}
-                ({prescription.patient.email})
+                  {p.patient.name}
+                </Link>
               </p>
-              <p>
-                <strong>Дійсний до:</strong>{" "}
-                {prescription.validUntil
-                  ? new Date(prescription.validUntil).toLocaleDateString()
-                  : "Без терміну дії"}
-              </p>
+              {p.pdfUrl && (
+                <p>
+                  <a
+                    href={p.pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.pdfLink}
+                  >
+                    📄 Переглянути PDF
+                  </a>
+                </p>
+              )}
               <p>
                 <strong>Дата створення:</strong>{" "}
-                {new Date(prescription.createdAt).toLocaleDateString()}
+                {new Date(p.createdAt).toLocaleDateString()}
               </p>
               <button
-                onClick={() => handleDelete(prescription._id)}
+                onClick={() => handleDelete(p._id)}
                 style={{
                   marginTop: "8px",
                   backgroundColor: "#dc2626",
