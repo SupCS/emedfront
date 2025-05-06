@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { getUnreadCounts } from "../../api/chatApi";
 import { setUnreadMessages } from "../../store/unreadMessagesSlice";
 import styles from "./Sidebar.module.css";
+import { disconnectSocket } from "../../api/socket";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,6 +57,7 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     try {
+      disconnectSocket();
       localStorage.removeItem("authToken");
       toast.success("Вихід успішний");
       navigate("/login");
