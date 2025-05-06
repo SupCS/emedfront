@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getPatientPrescriptions } from "../../api/prescriptionsApi";
+import { getUserProfile } from "../../api/profileApi";
 import { jwtDecode } from "jwt-decode";
 import Loader from "../../components/Loader/Loader";
 import PrescriptionModal from "../../components/PrescriptionModal/PrescriptionModal";
 import styles from "./PrescriptionsPage.module.css";
-import { Link } from "react-router-dom";
 
 const PrescriptionsPage = () => {
   const { id } = useParams();
@@ -14,22 +14,26 @@ const PrescriptionsPage = () => {
   const [loading, setLoading] = useState(true);
   const [isDoctor, setIsDoctor] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [patientProfile, setPatientProfile] = useState(null);
+
+  const fetchData = async () => {
+    try {
+      const [prescData, profileData] = await Promise.all([
+        getPatientPrescriptions(id),
+        getUserProfile("patient", id),
+      ]);
+      setPrescriptions(prescData);
+      setPatientProfile(profileData);
+    } catch (err) {
+      toast.error("Помилка завантаження даних пацієнта або призначень.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPrescriptions = async () => {
-      try {
-        const data = await getPatientPrescriptions(id);
-        setPrescriptions(data);
-      } catch (err) {
-        toast.error(err.message || "Не вдалося завантажити призначення.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchData();
 
-    fetchPrescriptions();
-
-    // Перевіряємо, чи користувач - лікар
     const token = localStorage.getItem("authToken");
     if (token) {
       const decoded = jwtDecode(token);
@@ -54,6 +58,7 @@ const PrescriptionsPage = () => {
         <p>У цього пацієнта ще немає призначень.</p>
       ) : (
         <ul className={styles.prescriptionList}>
+          {console.log(prescriptions)}
           {prescriptions.map((prescription) => (
             <li key={prescription._id} className={styles.prescriptionItem}>
               <h3>Діагноз: {prescription.diagnosis}</h3>
@@ -70,13 +75,16 @@ const PrescriptionsPage = () => {
                 </Link>{" "}
                 ({prescription.doctor.specialization})
               </p>
-
-              <p>
-                <strong>Дійсний до:</strong>{" "}
-                {prescription.validUntil
-                  ? new Date(prescription.validUntil).toLocaleDateString()
-                  : "Без терміну дії"}
-              </p>
+              {prescription.pdfUrl && (
+                <a
+                  href={prescription.pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.pdfLink}
+                >
+                  📄 Переглянути PDF
+                </a>
+              )}
             </li>
           ))}
         </ul>
@@ -85,7 +93,10 @@ const PrescriptionsPage = () => {
       <PrescriptionModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
+        onCreated={fetchData}
         patientId={id}
+        patientName={patientProfile?.name || ""}
+        birthDate={patientProfile?.birthDate || ""}
       />
     </div>
   );

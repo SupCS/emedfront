@@ -73,3 +73,16 @@ h2 {
   color: inherit;
   cursor: pointer;
 }
+
+.pdfLink {
+  display: inline-block;
+  margin-top: 10px;
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.pdfLink:hover {
+  color: #1e40af;
+}

@@ -13,18 +13,6 @@ export const getDoctorPrescriptions = async (doctorId) => {
 };
 
 // Створити нове призначення
-export const createPrescription = async ({
-  patientId,
-  diagnosis,
-  treatment,
-  validUntil,
-}) => {
-  return handleRequest(
-    axiosInstance.post(`/prescriptions/create`, {
-      patientId,
-      diagnosis,
-      treatment,
-      validUntil,
-    })
-  );
+export const createPrescription = async (data) => {
+  return handleRequest(axiosInstance.post(`/prescriptions/create`, data));
 };
