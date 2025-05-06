@@ -75,16 +75,29 @@ const PrescriptionsPage = () => {
                 </Link>{" "}
                 ({prescription.doctor.specialization})
               </p>
-              {prescription.pdfUrl && (
-                <a
-                  href={prescription.pdfUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.pdfLink}
-                >
-                  📄 Переглянути PDF
-                </a>
-              )}
+              <div className={styles.attachmentsRow}>
+                {prescription.pdfUrl && (
+                  <a
+                    href={prescription.pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.pdfLink}
+                  >
+                    📄 Консультаційний висновок
+                  </a>
+                )}
+                {prescription.attachments?.map((att, index) => (
+                  <a
+                    key={index}
+                    href={att.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.pdfLink}
+                  >
+                    📎 {att.title}
+                  </a>
+                ))}
+              </div>
             </li>
           ))}
         </ul>

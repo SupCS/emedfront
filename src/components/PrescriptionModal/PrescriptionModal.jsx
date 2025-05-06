@@ -20,6 +20,7 @@ const PrescriptionModal = ({
   twoWeeksLater.setDate(today.getDate() + 14);
 
   const [loading, setLoading] = useState(false);
+  const [attachments, setAttachments] = useState([]);
 
   const [formData, setFormData] = useState({
     patientId,
@@ -75,12 +76,48 @@ const PrescriptionModal = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e, index) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      toast.error("Дозволені лише PDF-файли!");
+      return;
+    }
+
+    setAttachments((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], file };
+      return updated;
+    });
+  };
+
+  const handleTitleChange = (e, index) => {
+    const title = e.target.value;
+    setAttachments((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], title };
+      return updated;
+    });
+  };
+
+  const addAttachmentField = () => {
+    if (attachments.length >= 4) {
+      toast.info("Максимум 4 додаткові файли.");
+      return;
+    }
+    setAttachments((prev) => [...prev, { file: null, title: "" }]);
+  };
+
+  const removeAttachment = (index) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const payload = { ...formData };
-      await createPrescription(payload);
+      await createPrescription(payload, attachments);
       toast.success("Призначення успішно створено!");
       if (onCreated) await onCreated();
       onClose();
@@ -146,18 +183,57 @@ const PrescriptionModal = ({
               <Loader />
             </div>
           ) : (
-            <div className={styles.buttonGroup}>
-              <button type="submit" className={styles.saveButton}>
-                Виписати
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className={styles.cancelButton}
-              >
-                Закрити
-              </button>
-            </div>
+            <>
+              <div className={styles.attachmentsBlock}>
+                <label className={styles.label}>Додаткові PDF-файли:</label>
+                {attachments.map((attachment, index) => (
+                  <div key={index} className={styles.attachmentColumn}>
+                    <div className={styles.attachmentRow}>
+                      <input
+                        type="text"
+                        placeholder="Назва файлу"
+                        value={attachment.title}
+                        onChange={(e) => handleTitleChange(e, index)}
+                        className={styles.input}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeAttachment(index)}
+                        className={styles.removeButton}
+                      >
+                        ✖
+                      </button>
+                    </div>
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      onChange={(e) => handleFileChange(e, index)}
+                      className={styles.inputFile}
+                    />
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addAttachmentField}
+                  className={styles.addButton}
+                >
+                  ➕ Додати файл
+                </button>
+              </div>
+
+              <div className={styles.buttonGroup}>
+                <button type="submit" className={styles.saveButton}>
+                  Виписати
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className={styles.cancelButton}
+                >
+                  Закрити
+                </button>
+              </div>
+            </>
           )}
         </form>
       </div>

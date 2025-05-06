@@ -86,3 +86,20 @@ h2 {
 .pdfLink:hover {
   color: #1e40af;
 }
+
+.attachmentsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pdfLink {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.pdfLink:hover {
+  text-decoration: underline;
+}
