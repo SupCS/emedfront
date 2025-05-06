@@ -184,18 +184,29 @@ function PrescriptionsTab() {
                   {p.patient.name}
                 </Link>
               </p>
-              {p.pdfUrl && (
-                <p>
+              <div className={styles.attachmentsRow}>
+                {p.pdfUrl && (
                   <a
                     href={p.pdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.pdfLink}
                   >
-                    📄 Переглянути PDF
+                    📄 Консультаційний висновок
                   </a>
-                </p>
-              )}
+                )}
+                {p.attachments?.map((att, index) => (
+                  <a
+                    key={index}
+                    href={att.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.pdfLink}
+                  >
+                    📎 {att.title}
+                  </a>
+                ))}
+              </div>
               <p>
                 <strong>Дата створення:</strong>{" "}
                 {new Date(p.createdAt).toLocaleDateString()}

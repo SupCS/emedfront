@@ -101,6 +101,34 @@ h2 {
   margin-top: 12px;
 }
 
+.pdfLink {
+  display: inline-block;
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.pdfLink:hover {
+  color: #1e40af;
+}
+
+.attachmentsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pdfLink {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.pdfLink:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   .filters {
     flex-direction: column;

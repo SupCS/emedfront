@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { createPrescription } from "../../api/prescriptionsApi";
 import "flatpickr/dist/flatpickr.min.css";
@@ -16,13 +16,8 @@ const PrescriptionModal = ({
   birthDate,
 }) => {
   const today = new Date();
-  const twoWeeksLater = new Date();
-  twoWeeksLater.setDate(today.getDate() + 14);
 
-  const [loading, setLoading] = useState(false);
-  const [attachments, setAttachments] = useState([]);
-
-  const [formData, setFormData] = useState({
+  const getInitialFormData = () => ({
     patientId,
     institution: 'Медичний центр "Emed Clinic"',
     headerName: "Emed Clinic",
@@ -44,29 +39,38 @@ const PrescriptionModal = ({
     doctorName: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [attachments, setAttachments] = useState([]);
+  const [formData, setFormData] = useState(getInitialFormData());
+
   useEffect(() => {
-    const fetchDoctorData = async () => {
-      const token = localStorage.getItem("authToken");
-      if (!token) return;
-
-      const decoded = jwtDecode(token);
-      if (decoded.role === "doctor") {
-        try {
-          const doctor = await getDoctorDetails(decoded.id);
-          setFormData((prev) => ({
-            ...prev,
-            doctorText: `${doctor.specialization || ""}, ${doctor.name || ""}`,
-            doctorName: doctor.name || "",
-            patientName: patientName || "",
-            birthDate: birthDate?.split("T")[0] || "",
-          }));
-        } catch (err) {
-          console.error("Помилка завантаження лікаря:", err);
-        }
-      }
-    };
-
     if (isOpen) {
+      setFormData(getInitialFormData());
+      setAttachments([]);
+
+      const fetchDoctorData = async () => {
+        const token = localStorage.getItem("authToken");
+        if (!token) return;
+
+        const decoded = jwtDecode(token);
+        if (decoded.role === "doctor") {
+          try {
+            const doctor = await getDoctorDetails(decoded.id);
+            setFormData((prev) => ({
+              ...prev,
+              doctorText: `${doctor.specialization || ""}, ${
+                doctor.name || ""
+              }`,
+              doctorName: doctor.name || "",
+              patientName: patientName || "",
+              birthDate: birthDate?.split("T")[0] || "",
+            }));
+          } catch (err) {
+            console.error("Помилка завантаження лікаря:", err);
+          }
+        }
+      };
+
       fetchDoctorData();
     }
   }, [isOpen, patientName, birthDate]);
