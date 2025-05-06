@@ -6,7 +6,7 @@ import DoctorProfileInfo from "../../components/Profile/DoctorProfileInfo";
 import PatientProfileInfo from "../../components/Profile/PatientProfileInfo";
 import { getAvatarUrl } from "../../api/avatarApi";
 import EditProfileModal from "../../components/Profile/EditProfileModal/EditProfileModal";
-import { jwtDecode } from "jwt-decode"; // ⬅️ додай
+import { jwtDecode } from "jwt-decode";
 import styles from "./ProfilePage.module.css";
 
 function ProfilePage() {

@@ -7,6 +7,7 @@ import noteIcon from "../../assets/note.svg";
 import OutlineButton from "../Buttons/OutlineButton";
 import DoctorSchedule from "../DoctorSchedule/DoctorSchedule";
 import RightBlock from "./RightBlock";
+import DocumentSection from "./DocumentSection";
 
 export default function DoctorProfileInfo({ profile, isOwner, onEdit }) {
   const renderFieldLine = (label, value) => (
@@ -99,6 +100,9 @@ export default function DoctorProfileInfo({ profile, isOwner, onEdit }) {
             </OutlineButton>
           </div>
         )}
+
+        {/* Документи */}
+        <DocumentSection isOwner={isOwner} userId={profile.id} />
 
         {/* Schedule */}
         <div className={styles.leftBlock}>

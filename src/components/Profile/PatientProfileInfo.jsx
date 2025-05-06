@@ -10,6 +10,8 @@ import genderIcon from "../../assets/gender.svg";
 import OutlineButton from "../Buttons/OutlineButton";
 import RightBlock from "./RightBlock";
 import noteIcon from "../../assets/note.svg";
+import DocumentSection from "./DocumentSection";
+
 import { getPatientPrescriptions } from "../../api/prescriptionsApi";
 
 export default function PatientProfileInfo({ profile, isOwner, onEdit }) {
@@ -156,6 +158,9 @@ export default function PatientProfileInfo({ profile, isOwner, onEdit }) {
             Переглянути всі призначення
           </OutlineButton>
         </div>
+
+        {/* Документи */}
+        <DocumentSection isOwner={isOwner} userId={profile.id} />
 
         {/* Кнопка до записів */}
         {isOwner && (
