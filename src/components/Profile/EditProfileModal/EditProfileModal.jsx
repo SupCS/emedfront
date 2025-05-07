@@ -23,7 +23,6 @@ function EditProfileModal({
   useEffect(() => {
     if (!currentData) return;
 
-    // Якщо передані editableFields — беремо тільки їх
     const allowedData = editableFields
       ? Object.fromEntries(
           Object.entries(currentData).filter(([key]) =>
@@ -154,6 +153,9 @@ function getFieldLabel(field) {
     bio: "Про себе",
     specialization: "Спеціалізація",
     experience: "Стаж (роки)",
+    passportNumber: "Номер паспорта",
+    address: "Адреса проживання",
+    workplace: "Місце роботи",
   };
   return labels[field] || field;
 }

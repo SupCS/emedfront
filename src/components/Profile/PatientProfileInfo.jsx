@@ -97,10 +97,27 @@ export default function PatientProfileInfo({ profile, isOwner, onEdit }) {
             <strong>Хронічні діагнози:</strong>{" "}
             {(profile.chronicDiseases || []).join(", ") || "-"}
           </div>
+          <div className={styles.fieldLine}>
+            <strong>Номер паспорта:</strong> {profile.passportNumber || "-"}
+          </div>
+          <div className={styles.fieldLine}>
+            <strong>Адреса:</strong> {profile.address || "-"}
+          </div>
+          <div className={styles.fieldLine}>
+            <strong>Місце роботи:</strong> {profile.workplace || "-"}
+          </div>
           {isOwner && (
             <button
               className={styles.editButton}
-              onClick={() => onEdit(["allergies", "chronicDiseases"])}
+              onClick={() =>
+                onEdit([
+                  "allergies",
+                  "chronicDiseases",
+                  "passportNumber",
+                  "address",
+                  "workplace",
+                ])
+              }
             >
               <img
                 src={pencilIcon}
