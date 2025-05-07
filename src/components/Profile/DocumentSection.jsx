@@ -112,7 +112,9 @@ export default function DocumentSection({ isOwner, userId }) {
                   alt="Документ"
                   className={styles.documentCardIcon}
                 />
-                <div className={styles.documentCardTitle}>{doc.title}</div>
+                <div className={styles.documentCardTitle} title={doc.title}>
+                  {doc.title}
+                </div>
               </a>
               {isOwner && (
                 <button
