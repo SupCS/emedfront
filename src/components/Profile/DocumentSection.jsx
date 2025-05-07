@@ -4,18 +4,21 @@ import noteIcon from "../../assets/note.svg";
 import uploadIcon from "../../assets/upload.svg";
 import deleteIcon from "../../assets/delete.svg";
 import fileIcon from "../../assets/file.svg";
+import { toast } from "react-toastify";
 
 import {
   getProfileDocuments,
   uploadProfileDocument,
   deleteProfileDocument,
 } from "../../api/profileApi";
+import Loader from "../Loader/Loader";
 
 export default function DocumentSection({ isOwner, userId }) {
   const [documents, setDocuments] = useState([]);
   const [fileTitle, setFileTitle] = useState("");
   const [fileInput, setFileInput] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const fetchDocs = async () => {
@@ -23,25 +26,52 @@ export default function DocumentSection({ isOwner, userId }) {
         const res = await getProfileDocuments(userId);
         setDocuments(res.documents || []);
       } catch (err) {
+        toast.error("Помилка завантаження документів");
         console.error("Помилка завантаження документів", err);
       }
     };
     fetchDocs();
   }, [userId]);
 
+  const isValidTitle = (title) => {
+    const invalidChars = /[\\/:*?"<>|]/;
+    return (
+      typeof title === "string" &&
+      title.trim().length >= 3 &&
+      title.trim().length <= 100 &&
+      !invalidChars.test(title)
+    );
+  };
+
   const handleUpload = async () => {
-    if (!fileTitle || !fileInput) return alert("Заповніть всі поля");
+    if (!fileTitle || !fileInput) {
+      toast.warning("Заповніть всі поля");
+      return;
+    }
+
+    if (!isValidTitle(fileTitle)) {
+      toast.warning(
+        'Некоректна назва: максимум 100 символів, без символів / \\ : * ? " < > |'
+      );
+      return;
+    }
+
     const formData = new FormData();
     formData.append("document", fileInput);
-    formData.append("title", fileTitle);
+    formData.append("title", fileTitle.trim());
+
+    setIsUploading(true);
     try {
       const res = await uploadProfileDocument(formData);
       setDocuments((prev) => [...prev, res.document]);
+      toast.success("Документ додано");
       setFileTitle("");
       setFileInput(null);
       setIsAdding(false);
     } catch (err) {
-      alert("Помилка при завантаженні");
+      toast.error("Помилка при завантаженні документа");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -50,8 +80,9 @@ export default function DocumentSection({ isOwner, userId }) {
     try {
       await deleteProfileDocument(id);
       setDocuments((prev) => prev.filter((d) => d.id !== id));
+      toast.info("Документ видалено");
     } catch (err) {
-      alert("Помилка при видаленні");
+      toast.error("Помилка при видаленні документа");
     }
   };
 
@@ -134,21 +165,25 @@ export default function DocumentSection({ isOwner, userId }) {
                 </div>
               )}
 
-              <div className={styles.uploadActions}>
-                <button onClick={handleUpload} className={styles.saveButton}>
-                  Завантажити
-                </button>
-                <button
-                  onClick={() => {
-                    setFileTitle("");
-                    setFileInput(null);
-                    setIsAdding(false);
-                  }}
-                  className={styles.cancelButton}
-                >
-                  Скасувати
-                </button>
-              </div>
+              {isUploading ? (
+                <Loader size={24} />
+              ) : (
+                <div className={styles.uploadActions}>
+                  <button onClick={handleUpload} className={styles.saveButton}>
+                    Завантажити
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFileTitle("");
+                      setFileInput(null);
+                      setIsAdding(false);
+                    }}
+                    className={styles.cancelButton}
+                  >
+                    Скасувати
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
