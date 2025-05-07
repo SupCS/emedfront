@@ -3,6 +3,7 @@ import styles from "./ProfileInfo.module.css";
 import noteIcon from "../../assets/note.svg";
 import uploadIcon from "../../assets/upload.svg";
 import deleteIcon from "../../assets/delete.svg";
+import fileIcon from "../../assets/file.svg";
 
 import {
   getProfileDocuments,
@@ -66,11 +67,21 @@ export default function DocumentSection({ isOwner, userId }) {
       {documents.length === 0 ? (
         <div>Документи відсутні.</div>
       ) : (
-        <ul className={styles.documentList}>
+        <div className={styles.cardGrid}>
           {documents.map((doc) => (
-            <li key={doc.id} className={styles.documentItem}>
-              <a href={doc.url} target="_blank" rel="noopener noreferrer">
-                {doc.title}
+            <div key={doc.id} className={styles.documentCard}>
+              <a
+                href={doc.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.documentCardLink}
+              >
+                <img
+                  src={fileIcon}
+                  alt="Документ"
+                  className={styles.documentCardIcon}
+                />
+                <div className={styles.documentCardTitle}>{doc.title}</div>
               </a>
               {isOwner && (
                 <button
@@ -81,9 +92,9 @@ export default function DocumentSection({ isOwner, userId }) {
                   <img src={deleteIcon} alt="delete" />
                 </button>
               )}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
       {isOwner && (
