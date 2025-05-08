@@ -52,7 +52,7 @@ export default function DoctorProfileInfo({ profile, isOwner, onEdit }) {
           {isOwner && (
             <button
               className={styles.editButton}
-              onClick={() => onEdit(["avatar", "name", "phone"])}
+              onClick={() => onEdit(["avatar"])}
             >
               <img
                 src={pencilIcon}
