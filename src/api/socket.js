@@ -24,6 +24,11 @@ export const connectSocket = () => {
     return;
   }
 
+  if (socket.connected) {
+    socket.disconnect();
+    console.log("Старий WebSocket відключено перед повторним підключенням.");
+  }
+
   socket.auth.token = token;
 
   if (!socket.connected) {
