@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   getAllPrescriptions,
-  deletePrescription,
+  updatePrescriptionArchiveStatus,
 } from "../../../../api/adminApi";
 import styles from "./PrescriptionsTab.module.css";
 import Loader from "../../../../components/Loader/Loader";
@@ -103,15 +103,22 @@ function PrescriptionsTab() {
     setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Ви впевнені, що хочете видалити це призначення?")) {
-      return;
-    }
+  const handleToggleArchive = async (id, currentState) => {
+    const newState = !currentState;
+
+    const confirmMsg = newState
+      ? "Архівувати це призначення? Його не буде видно пацієнту і лікарю."
+      : "Розархівувати це призначення? Воно знову стане доступним користувачам.";
+
+    if (!window.confirm(confirmMsg)) return;
+
     try {
-      await deletePrescription(id);
-      setPrescriptions((prev) => prev.filter((p) => p._id !== id));
+      await updatePrescriptionArchiveStatus(id, newState);
+      setPrescriptions((prev) =>
+        prev.map((p) => (p._id === id ? { ...p, isArchived: newState } : p))
+      );
     } catch (error) {
-      console.error("❌ Error deleting prescription:", error);
+      console.error("❌ Error updating archive status:", error);
     }
   };
 
@@ -212,10 +219,10 @@ function PrescriptionsTab() {
                 {new Date(p.createdAt).toLocaleDateString()}
               </p>
               <button
-                onClick={() => handleDelete(p._id)}
+                onClick={() => handleToggleArchive(p._id, p.isArchived)}
                 style={{
                   marginTop: "8px",
-                  backgroundColor: "#dc2626",
+                  backgroundColor: p.isArchived ? "#16a34a" : "#dc2626",
                   color: "white",
                   border: "none",
                   padding: "6px 12px",
@@ -223,7 +230,7 @@ function PrescriptionsTab() {
                   cursor: "pointer",
                 }}
               >
-                Видалити
+                {p.isArchived ? "Розархівувати" : "Архівувати"}
               </button>
             </li>
           ))}

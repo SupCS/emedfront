@@ -83,9 +83,14 @@ export const getAllPrescriptions = async () => {
   return handleRequest(axiosInstance.get("/admin/prescriptions"));
 };
 
-export const deletePrescription = async (prescriptionId) => {
+export const updatePrescriptionArchiveStatus = async (
+  prescriptionId,
+  isArchived
+) => {
   return handleRequest(
-    axiosInstance.delete(`/admin/prescriptions/${prescriptionId}`)
+    axiosInstance.patch(`/admin/prescriptions/${prescriptionId}`, {
+      isArchived,
+    })
   );
 };
 
